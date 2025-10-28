@@ -8,7 +8,13 @@ import { auth } from "./lib/auth";
 
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ 
+  origin: [
+    "http://localhost:5173", 
+    "https://fullstack-starter-frontend-m865w7ere-keri-carpenters-projects.vercel.app"
+  ], 
+  credentials: true 
+}));
 app.use(json());
 
 // Health check
