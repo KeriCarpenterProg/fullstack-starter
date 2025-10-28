@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "npx prisma migrate deploy && node dist/index.js",
+    "start": "npx prisma db push && node dist/index.js",
     "prisma": "prisma",
     "seed": "node --env-file=.env prisma/quick-seed.js"
   },
