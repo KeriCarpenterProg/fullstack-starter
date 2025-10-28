@@ -30,10 +30,6 @@ function App() {
     setLoading(false);
   };
 
-  const testConnection = () => {
-    console.log('API functions loaded:', { authAPI, projectsAPI });
-  };
-
   return (
    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h1>🚀 Frontend + Backend Test</h1>

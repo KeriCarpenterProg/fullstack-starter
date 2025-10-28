@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { authAPI, projectsAPI } from './services/api';
 
 function TestAPI() {
