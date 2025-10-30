@@ -5,6 +5,7 @@ import { json } from "express";
 import authRouter from "./routes/auth";
 import projectRouter from "./routes/projects";
 import { auth } from "./lib/auth";
+import { db } from "./lib/db";
 
 
 const app = express();
@@ -19,6 +20,21 @@ app.use(json());
 
 // Health check
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+// Debug endpoints (temporary - remove in production)
+app.get("/api/debug/users", async (_req, res) => {
+  const users = await db.user.findMany({ 
+    select: { id: true, email: true, name: true, createdAt: true } 
+  });
+  res.json(users);
+});
+
+app.get("/api/debug/projects", async (_req, res) => {
+  const projects = await db.project.findMany({
+    include: { owner: { select: { email: true } } }
+  });
+  res.json(projects);
+});
 
 // Auth routes
 app.use("/api/auth", authRouter);
