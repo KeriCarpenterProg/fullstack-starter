@@ -1,5 +1,7 @@
 # 🚀 Full-Stack Project Manager
 
+![CI/CD Pipeline](https://github.com/KeriCarpenterProg/fullstack-starter/actions/workflows/ci-cd.yml/badge.svg)
+
 A modern, production-ready full-stack application for project management with authentication, built with React, Node.js, and PostgreSQL.
 
 ## 🌐 Live Deployments
