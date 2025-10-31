@@ -26,6 +26,10 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,15 +49,20 @@ jobs:
       - name: Setup test environment
         run: |
           cd server
-          cp .env.example .env || echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" > .env
+          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" > .env
           echo "JWT_SECRET=test_jwt_secret_for_ci_cd_testing_only" >> .env
 
       - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
         run: |
           cd server
           npx prisma migrate deploy
 
       - name: Run backend tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
         run: |
           cd server
           npm test
