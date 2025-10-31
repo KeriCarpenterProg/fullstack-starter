@@ -48,6 +48,12 @@ app.get("/api/me", auth, (req, res) => {
 });
 
 const port = Number(process.env.PORT) || 4000;
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
-});
+
+// Only start the server if this file is run directly (not imported for testing)
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`API listening on http://localhost:${port}`);
+  });
+}
+
+export default app;
