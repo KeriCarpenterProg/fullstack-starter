@@ -1,5 +1,6 @@
 // src/routes/projects.ts
 import { Router } from "express";
+import type { JwtUser } from "../lib/auth";
 import { z } from "zod";
 import { db } from "../lib/db";
 import { auth } from "../lib/auth";
@@ -22,8 +23,10 @@ const UpdateProject = z.object({
 // GET /api/projects - List user's projects
 router.get("/", async (req, res) => {
   try {
+    const userId = (req.user as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
     const projects = await db.project.findMany({
-      where: { ownerId: req.user!.id },
+      where: { ownerId: userId },
       orderBy: { updatedAt: "desc" },
     });
     res.json(projects);
@@ -36,10 +39,12 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const input = CreateProject.parse(req.body);
+    const userId = (req.user as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
     const project = await db.project.create({
       data: {
         ...input,
-        ownerId: req.user!.id,
+        ownerId: userId,
       },
     });
     res.status(201).json(project);
@@ -51,10 +56,12 @@ router.post("/", async (req, res) => {
 // GET /api/projects/:id - Get specific project
 router.get("/:id", async (req, res) => {
   try {
+    const userId = (req.user as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
     const project = await db.project.findFirst({
       where: {
         id: req.params.id,
-        ownerId: req.user!.id, // Ensure user owns this project
+        ownerId: userId, // Ensure user owns this project
       },
     });
     
@@ -74,10 +81,12 @@ router.put("/:id", async (req, res) => {
     const input = UpdateProject.parse(req.body);
     
     // Check if project exists and user owns it
+    const userId = (req.user as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
     const existingProject = await db.project.findFirst({
       where: {
         id: req.params.id,
-        ownerId: req.user!.id,
+        ownerId: userId,
       },
     });
     
@@ -100,10 +109,12 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     // Check if project exists and user owns it
+    const userId = (req.user as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
     const existingProject = await db.project.findFirst({
       where: {
         id: req.params.id,
-        ownerId: req.user!.id,
+        ownerId: userId,
       },
     });
     
