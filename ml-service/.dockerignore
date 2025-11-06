@@ -6,4 +6,5 @@ __pycache__/
 .git/
 .gitignore
 Dockerfile
-category_classifier.pkl
+# Keep the trained model in the image; if excluded, service starts without it.
+# category_classifier.pkl
