@@ -1,19 +1,29 @@
 // src/lib/auth.ts
 import jwt from "jsonwebtoken";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 export type JwtUser = { id: string; email: string; name?: string };
+
+// Augment Express Request to include our JwtUser
+declare global {
+  namespace Express {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Request {
+      user?: JwtUser;
+    }
+  }
+}
 
 export function sign(user: JwtUser) {
   return jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
 }
 
-export function auth(
-  req: Request & { user?: JwtUser },
+export const auth: RequestHandler = (
+  req: Request,
   res: Response,
   next: NextFunction
-) {
+) => {
   const header = req.headers.authorization; // "Bearer <token>"
   if (!header) return res.status(401).json({ error: "Missing Authorization" });
 
@@ -38,4 +48,4 @@ export function auth(
   } catch {
     res.status(401).json({ error: "Invalid token" });
   }
-}
+};
