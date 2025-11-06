@@ -36,6 +36,12 @@ router.post("/signin", async (req, res) => {
     const input = SignIn.parse(req.body);
     const user = await db.user.findUnique({ where: { email: input.email } });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    
+    // Check if user has a password (not OAuth user)
+    if (!user.password) {
+      return res.status(401).json({ error: "Please sign in with Google" });
+    }
+    
     const ok = await compare(input.password, user.password);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
     const token = sign({ id: user.id, email: user.email, name: user.name ?? undefined });
