@@ -4,6 +4,7 @@ import cors from "cors";
 import { json } from "express";
 import authRouter from "./routes/auth";
 import projectRouter from "./routes/projects";
+import oauthRouter from "./routes/oauth";
 import { auth } from "./lib/auth";
 import { db } from "./lib/db";
 
@@ -39,13 +40,63 @@ app.get("/api/debug/projects", async (_req, res) => {
 // Auth routes
 app.use("/api/auth", authRouter);
 
+// OAuth routes
+app.use("/api/oauth", oauthRouter);
+
 // Project routes
 app.use("/api/projects", projectRouter);
 
-// Test protected endpoint
-app.get("/api/me", auth, (req, res) => {
-  res.json({ message: "You are authenticated!", user: req.user });
+// ML prediction endpoint (proxy to external ML microservice)
+app.post("/api/ml/predict-category", async (req, res) => {
+  const { text } = req.body;
+
+  if (!text) {
+    return res.status(400).json({ error: "Text is required" });
+  }
+
+  const baseUrl = process.env.ML_SERVICE_URL || "http://localhost:5002";
+  const url = `${baseUrl.replace(/\/$/, "")}/predict`;
+
+  // Timeout + single retry strategy
+  const attemptFetch = async (attempt: number): Promise<Response> => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      return response;
+    } catch (err) {
+      clearTimeout(timeout);
+      if (attempt === 0) throw err; // no more retries
+      return attemptFetch(attempt - 1);
+    }
+  };
+
+  try {
+    const response = await attemptFetch(1); // 1 retry allowed
+    if (!response.ok) {
+      throw new Error(`ML service returned ${response.status}`);
+    }
+    const prediction = await response.json();
+    res.json(prediction);
+  } catch (error: any) {
+    console.error("ML service error:", error);
+    res.status(503).json({
+      error: "ML service unavailable",
+      message: error.name === "AbortError" ? "ML request timed out" : error.message,
+    });
+  }
 });
+
+// Test protected endpoint (temporarily commented due to TypeScript issues)
+// app.get("/api/me", auth, (req, res) => {
+//   res.json({ message: "You are authenticated!", user: req.user });
+// });
 
 const port = Number(process.env.PORT) || 4000;
 
