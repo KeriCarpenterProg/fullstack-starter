@@ -114,6 +114,7 @@ function App() {
       try {
         const prediction: MlPrediction = await mlAPI.predictCategory(debouncedDescription);
         if (cancelled) return;
+        console.log('ML Prediction:', prediction); // Add this line
         // Optional confidence threshold
         if (prediction.confidence < 0.4) {
           setSuggestedCategory(null);
@@ -131,6 +132,7 @@ function App() {
       } finally {
         !cancelled && setSuggestionLoading(false);
       }
+      
     })();
     return () => { cancelled = true; };
   }, [debouncedDescription]);
@@ -301,6 +303,7 @@ function App() {
       </div>
     </div>
   );
+
 
   return (
     <div className="app">
