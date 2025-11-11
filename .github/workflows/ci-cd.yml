@@ -10,7 +10,6 @@ jobs:
   test-backend:
     name: Test Backend
     runs-on: ubuntu-latest
-    
     services:
       postgres:
         image: postgres:15
@@ -25,110 +24,103 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
     env:
       DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
       JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
-
-      - name: Install backend dependencies
+      - name: Install backend deps
+        run: cd server && npm ci
+      - name: Create .env
         run: |
           cd server
-          npm ci
-
-      - name: Setup test environment
-        run: |
-          cd server
-          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db" > .env
-          echo "JWT_SECRET=test_jwt_secret_for_ci_cd_testing_only" >> .env
-
-      - name: Run database migrations
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-        run: |
-          cd server
-          npx prisma migrate deploy
-
-      - name: Run backend tests
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-          JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
-        run: |
-          cd server
-          npm test
+          printf "DATABASE_URL=%s\nJWT_SECRET=%s\n" "postgresql://test_user:test_password@localhost:5432/test_db" "test_jwt_secret_for_ci_cd_testing_only" > .env
+      - name: Migrate
+        run: cd server && npx prisma migrate deploy
+      - name: Test backend
+        run: cd server && npm test
 
   test-frontend:
     name: Test Frontend
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: client/package-lock.json
-
-      - name: Install frontend dependencies
-        run: |
-          cd client
-          npm ci
-
+      - name: Install frontend deps
+        run: cd client && npm ci
       - name: Build frontend
-        run: |
-          cd client
-          npm run build
-
-      # TODO: Add frontend tests when they exist
-      # - name: Run frontend tests
-      #   run: |
-      #     cd client
-      #     npm test
+        run: cd client && npm run build
 
   deploy-backend:
     name: Deploy Backend to Railway
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Railway
-        uses: railwayapp/railway-deploy@v3
-        with:
-          api_key: ${{ secrets.RAILWAY_API_KEY }}
-          project_id: ${{ secrets.RAILWAY_PROJECT_ID }}
-          service: backend
+      - uses: actions/checkout@v4
+      - name: Deploy backend via Railway CLI
+        run: |
+          npm i -g @railway/cli
+          railway login --apiKey "${{ secrets.RAILWAY_API_KEY }}"
+          railway link --project "${{ secrets.RAILWAY_PROJECT_ID }}" --service backend
+          railway up --service backend --yes
 
   deploy-frontend:
     name: Deploy Frontend to Vercel
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Deploy frontend via Vercel CLI
+        run: |
+          npm i -g vercel
+          cd client
+          vercel pull --yes --environment=production --token "${{ secrets.VERCEL_TOKEN }}"
+          vercel build --prod --token "${{ secrets.VERCEL_TOKEN }}"
+          vercel deploy --prebuilt --prod --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./client
+  deploy-ml-service:
+    name: Deploy ML Service to Railway
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy ml-service via Railway CLI
+        run: |
+          npm i -g @railway/cli
+          railway login --apiKey "${{ secrets.RAILWAY_API_KEY }}"
+          railway link --project "${{ secrets.RAILWAY_PROJECT_ID }}" --service ml-service
+          railway up --service ml-service --yes
+      - name: ML Service Health Check
+        env:
+          ML_SERVICE_URL: ${{ secrets.ML_SERVICE_URL }}
+        run: |
+          curl -sSf "$ML_SERVICE_URL/health" | grep 'model_loaded' || (echo 'ML health check failed' && exit 1)
+
+  post-deploy-verification:
+    name: Aggregate Health Verification
+    needs: [deploy-backend, deploy-frontend, deploy-ml-service]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Backend health
+        env:
+          BACKEND_PUBLIC_URL: ${{ secrets.BACKEND_PUBLIC_URL }}
+        run: |
+          curl -sSf "$BACKEND_PUBLIC_URL/api/health" | grep 'ok' || (echo 'Backend health failed' && exit 1)
+      - name: ML proxy smoke test
+        env:
+          BACKEND_PUBLIC_URL: ${{ secrets.BACKEND_PUBLIC_URL }}
+        run: |
+          curl -sSf -X POST "$BACKEND_PUBLIC_URL/api/ml/predict-category" -H 'Content-Type: application/json' -d '{"text":"Quick integration test"}' | grep 'category' || (echo 'ML proxy test failed' && exit 1)

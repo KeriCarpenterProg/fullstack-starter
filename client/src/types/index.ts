@@ -10,6 +10,7 @@ export interface Project {
   id: string;
   title: string;
   description: string | null;
+  category?: string; // added category (optional in older rows before migration sync)
   status: string;
   ownerId: string;
   createdAt: string;
@@ -23,4 +24,10 @@ export interface AuthResponse {
 
 export interface ApiError {
   error: string;
+}
+
+export interface MlPrediction {
+  category: string;
+  confidence: number;
+  probabilities?: Record<string, number>;
 }

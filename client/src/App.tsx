@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { authAPI, projectsAPI } from './services/api';
-import type { Project } from './types';
+import { authAPI, projectsAPI, mlAPI } from './services/api';
+import type { Project, MlPrediction } from './types';
+import { useDebounce } from './hooks/useDebounce';
 import './App.css';
 
 function App() {
@@ -15,6 +16,12 @@ function App() {
   const [name, setName] = useState('');
   const [newProjectTitle, setNewProjectTitle] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [newProjectCategory, setNewProjectCategory] = useState('uncategorized');
+  const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
+  const [suggestedConfidence, setSuggestedConfidence] = useState<number | null>(null);
+  const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const debouncedDescription = useDebounce(newProjectDescription, 600);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -78,14 +85,66 @@ function App() {
     e.preventDefault();
     setLoading(true);
     try {
-      await projectsAPI.createProject(newProjectTitle, newProjectDescription);
+      await projectsAPI.createProject(newProjectTitle, newProjectDescription, newProjectCategory);
       setNewProjectTitle('');
       setNewProjectDescription('');
+      setNewProjectCategory('uncategorized');
+      setSuggestedCategory(null);
+      setSuggestedConfidence(null);
       await loadProjects();
     } catch (error) {
       alert(`Failed to create project: ${error}`);
     }
     setLoading(false);
+  };
+
+  // Fetch ML category suggestion when description changes (debounced)
+  useEffect(() => {
+    // Basic guard: avoid predictions for very short or empty text
+    if (!debouncedDescription || debouncedDescription.trim().length < 8) {
+      setSuggestedCategory(null);
+      setSuggestedConfidence(null);
+      setSuggestionError(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setSuggestionLoading(true);
+      setSuggestionError(null);
+      try {
+        const prediction: MlPrediction = await mlAPI.predictCategory(debouncedDescription);
+        if (cancelled) return;
+        // Optional confidence threshold
+        if (prediction.confidence < 0.4) {
+          setSuggestedCategory(null);
+          setSuggestedConfidence(null);
+          return;
+        }
+        setSuggestedCategory(prediction.category);
+        setSuggestedConfidence(prediction.confidence);
+      } catch (err: any) {
+        if (!cancelled) {
+          setSuggestionError(err.message || 'Failed to get suggestion');
+          setSuggestedCategory(null);
+          setSuggestedConfidence(null);
+        }
+      } finally {
+        !cancelled && setSuggestionLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [debouncedDescription]);
+
+  const acceptSuggestion = () => {
+    if (suggestedCategory) {
+      setNewProjectCategory(suggestedCategory);
+      setSuggestedCategory(null); // hide suggestion after accepting
+    }
+  };
+
+  const dismissSuggestion = () => {
+    setSuggestedCategory(null);
+    setSuggestedConfidence(null);
   };
 
   const renderAuth = () => (
@@ -184,10 +243,37 @@ function App() {
                 onChange={(e) => setNewProjectDescription(e.target.value)}
                 placeholder="Project description"
               />
+              <input
+                type="text"
+                value={newProjectCategory}
+                onChange={(e) => setNewProjectCategory(e.target.value)}
+                placeholder="Category (or accept suggestion)"
+              />
               <button type="submit" disabled={loading} className="primary-button">
                 {loading ? '⏳' : '+ Add Project'}
               </button>
             </div>
+            {/* Suggestion panel */}
+            {(suggestionLoading || suggestedCategory || suggestionError) && (
+              <div className="suggestion-panel">
+                {suggestionLoading && <p className="muted">Predicting category...</p>}
+                {!suggestionLoading && suggestionError && (
+                  <p className="error-text">{suggestionError}</p>
+                )}
+                {!suggestionLoading && suggestedCategory && (
+                  <div className="suggestion-box">
+                    <strong>Suggested:</strong> {suggestedCategory}
+                    {suggestedConfidence !== null && (
+                      <small> (confidence {(suggestedConfidence * 100).toFixed(1)}%)</small>
+                    )}
+                    <div className="suggestion-actions">
+                      <button type="button" onClick={acceptSuggestion} className="accept-btn">Accept</button>
+                      <button type="button" onClick={dismissSuggestion} className="dismiss-btn">Dismiss</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </form>
         </div>
 
@@ -204,6 +290,7 @@ function App() {
                   <h3>{project.title}</h3>
                   <p>{project.description || 'No description'}</p>
                   <div className="project-meta">
+                    <small>Category: {project.category || 'uncategorized'}</small><br />
                     <small>Created: {new Date(project.createdAt).toLocaleDateString()}</small>
                   </div>
                 </div>

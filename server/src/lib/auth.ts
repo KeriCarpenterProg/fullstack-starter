@@ -8,9 +8,8 @@ export type JwtUser = { id: string; email: string; name?: string };
 // Augment Express Request to include our JwtUser
 declare global {
   namespace Express {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface Request {
-      user?: JwtUser;
+      jwtUser?: JwtUser; // use a distinct property to avoid collisions with passport's Request.user type
     }
   }
 }
@@ -40,7 +39,7 @@ export const auth: RequestHandler = (
 
     // Type guard to ensure we have the right shape
     if (typeof decoded === "object" && decoded !== null && "id" in decoded && "email" in decoded) {
-      req.user = decoded as JwtUser;
+  req.jwtUser = decoded as JwtUser;
       next();
     } else {
       res.status(401).json({ error: "Invalid token payload" });
