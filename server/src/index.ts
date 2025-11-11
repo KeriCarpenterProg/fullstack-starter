@@ -102,8 +102,14 @@ const port = Number(process.env.PORT) || 4000;
 
 // Only start the server if this file is run directly (not imported for testing)
 if (require.main === module) {
+  const mlUrl = process.env.ML_SERVICE_URL;
   app.listen(port, () => {
     console.log(`API listening on http://localhost:${port}`);
+    if (mlUrl) {
+      console.log(`ML service URL configured: ${mlUrl}`);
+    } else {
+      console.warn("ML_SERVICE_URL not set; falling back to http://localhost:5002. Set ML_SERVICE_URL in server/.env or deployment env vars.");
+    }
   });
 }
 

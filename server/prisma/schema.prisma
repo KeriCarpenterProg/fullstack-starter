@@ -26,6 +26,7 @@ model Project {
   id          String     @id @default(cuid())
   title       String
   description String?
+  category    String     @default("uncategorized")
   status      String     @default("todo")
   ownerId     String
   owner       User       @relation(fields: [ownerId], references: [id])
