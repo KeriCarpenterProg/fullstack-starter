@@ -10,7 +10,7 @@
     "dev": "npx prisma migrate deploy && ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "migrate": "npx prisma migrate deploy",
-    "start": "npm run build && npm run migrate && node dist/index.js",
+  "start": "npm run build && node scripts/prisma-start.js",
     "prisma": "prisma",
     "seed": "node --env-file=.env prisma/quick-seed.js"
   },
