@@ -116,12 +116,13 @@ function App() {
         if (cancelled) return;
         console.log('ML Prediction:', prediction); // Add this line
         // Optional confidence threshold
-        if (prediction.confidence < 0.4) {
+        if (prediction.confidence < 0.25) {
           setSuggestedCategory(null);
           setSuggestedConfidence(null);
           return;
         }
         setSuggestedCategory(prediction.category);
+        console.log("Suggested Category:", prediction.category);
         setSuggestedConfidence(prediction.confidence);
       } catch (err: any) {
         if (!cancelled) {
