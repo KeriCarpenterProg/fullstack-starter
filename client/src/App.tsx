@@ -117,12 +117,6 @@ function App() {
         console.log('ML Prediction:', prediction); // Add this line
         console.log("Suggested Category:", prediction.category);
         console.log("Suggested Confidence:", prediction.confidence);
-        // Optional confidence threshold
-        if (prediction.confidence < 0.22) {
-          setSuggestedCategory(null);
-          setSuggestedConfidence(null);
-          return;
-        }
         setSuggestedCategory(prediction.category);
         console.log("Suggested Category:", prediction.category);
         setSuggestedConfidence(prediction.confidence);
