@@ -251,6 +251,7 @@ function App() {
                 onChange={(e) => setNewProjectCategory(e.target.value)}
                 placeholder="Category (or accept suggestion)"
               />
+              
               <button type="submit" disabled={loading} className="primary-button">
                 {loading ? '⏳' : '+ Add Project'}
               </button>
@@ -308,6 +309,7 @@ function App() {
   return (
     <div className="app">
       {activeTab === 'dashboard' ? renderDashboard() : renderAuth()}
+      <button onClick={() => setSuggestionLoading(true)}>Simulate Loading</button>
     </div>
   );
 }
