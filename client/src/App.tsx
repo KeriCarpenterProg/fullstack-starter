@@ -101,7 +101,7 @@ function App() {
   // Fetch ML category suggestion when description changes (debounced)
   useEffect(() => {
     // Basic guard: avoid predictions for very short or empty text
-    if (!debouncedDescription || debouncedDescription.trim().length < 8) {
+    if (!debouncedDescription || debouncedDescription.trim().length < 4) {
       setSuggestedCategory(null);
       setSuggestedConfidence(null);
       setSuggestionError(null);
@@ -116,7 +116,7 @@ function App() {
         if (cancelled) return;
         console.log('ML Prediction:', prediction); // Add this line
         // Optional confidence threshold
-        if (prediction.confidence < 0.25) {
+        if (prediction.confidence < 0.22) {
           setSuggestedCategory(null);
           setSuggestedConfidence(null);
           return;
