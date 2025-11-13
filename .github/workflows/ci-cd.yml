@@ -128,7 +128,23 @@ jobs:
   backend-tests:
     name: Run Backend Tests
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
