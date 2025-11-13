@@ -11,6 +11,8 @@ import joblib
 # In production, you'd load this from your database
 training_data = [
     # Development
+    ("Test", "Development"),
+    ("Development", "Development"),
     ("Build new API endpoint for user authentication", "Development"),
     ("Fix bug in payment processing", "Development"),
     ("Implement React component for dashboard", "Development"),
@@ -19,7 +21,8 @@ training_data = [
     ("Add TypeScript types", "Development"),
     
     # Marketing
-    ("Create social media campaign", "Marketing"),
+    ("Marketing", "Marketing"),
+    ("Create social media campaign", "Marketing"),    
     ("Design email newsletter", "Marketing"),
     ("Plan product launch strategy", "Marketing"),
     ("Analyze user engagement metrics", "Marketing"),
@@ -27,6 +30,7 @@ training_data = [
     ("SEO optimization for landing page", "Marketing"),
     
     # Design
+    ("Design", "Design"),
     ("Design new logo", "Design"),
     ("Create wireframes for mobile app", "Design"),
     ("Update color scheme", "Design"),
@@ -35,6 +39,7 @@ training_data = [
     ("Redesign user profile page", "Design"),
     
     # Research
+    ("Research", "Research"),
     ("Research competitor features", "Research"),
     ("User research interviews", "Research"),
     ("Analyze market trends", "Research"),
@@ -43,6 +48,7 @@ training_data = [
     ("Benchmark performance", "Research"),
     
     # Operations
+    ("Operations", "Operations"),
     ("Set up monitoring dashboard", "Operations"),
     ("Configure cloud infrastructure", "Operations"),
     ("Implement backup strategy", "Operations"),
