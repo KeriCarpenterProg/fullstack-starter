@@ -306,7 +306,7 @@ function App() {
   return (
     <div className="app">
       {activeTab === 'dashboard' ? renderDashboard() : renderAuth()}
-      <button onClick={() => setSuggestionLoading(true)}>Simulate Loading</button>
+      {/* <button onClick={() => setSuggestionLoading(true)}>Simulate Loading</button> */}
     </div>
   );
 }
