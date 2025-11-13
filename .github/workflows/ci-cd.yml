@@ -124,3 +124,24 @@ jobs:
           BACKEND_PUBLIC_URL: ${{ secrets.BACKEND_PUBLIC_URL }}
         run: |
           curl -sSf -X POST "$BACKEND_PUBLIC_URL/api/ml/predict-category" -H 'Content-Type: application/json' -d '{"text":"Quick integration test"}' | grep 'category' || (echo 'ML proxy test failed' && exit 1)
+
+  backend-tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use the Node.js version your project requires
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: server
+
+      - name: Run Tests
+        run: npm test
+        working-directory: server
