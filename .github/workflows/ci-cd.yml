@@ -28,22 +28,29 @@ jobs:
       DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
       JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
-      - name: Install backend deps
+
+      - name: Install Dependencies
         run: cd server && npm ci
+
       - name: Create .env
         run: |
           cd server
           printf "DATABASE_URL=%s\nJWT_SECRET=%s\n" "postgresql://test_user:test_password@localhost:5432/test_db" "test_jwt_secret_for_ci_cd_testing_only" > .env
-      - name: Migrate
+
+      - name: Migrate Database
         run: cd server && npx prisma migrate deploy
-      - name: Test backend
-        run: cd server && npm test
+
+      - name: Run Tests
+        run: cd server && npm test -- --verbose
 
   test-frontend:
     name: Test Frontend
@@ -124,40 +131,3 @@ jobs:
           BACKEND_PUBLIC_URL: ${{ secrets.BACKEND_PUBLIC_URL }}
         run: |
           curl -sSf -X POST "$BACKEND_PUBLIC_URL/api/ml/predict-category" -H 'Content-Type: application/json' -d '{"text":"Quick integration test"}' | grep 'category' || (echo 'ML proxy test failed' && exit 1)
-
-  backend-tests:
-    name: Run Backend Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_USER: test_user
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    env:
-      DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-      JWT_SECRET: test_jwt_secret_for_ci_cd_testing_only
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18 # Use the Node.js version your project requires
-
-      - name: Install Dependencies
-        run: npm ci
-        working-directory: server
-
-      - name: Run Tests
-        run: npm test
-        working-directory: server
