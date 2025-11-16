@@ -122,3 +122,35 @@ describe('Protected Routes', () => {
     expect(response.body.ownerId).toBe(userId); // Field is called ownerId, not userId
   });
 });
+
+describe('ML Prediction Endpoint', () => {
+  test('POST /api/ml/predict-category should return a valid category', async () => {
+    const response = await request(app)
+      .post('/api/ml/predict-category')
+      .send({ text: 'Test' })
+      .expect(200);
+
+    expect(response.body).toHaveProperty('category');
+    expect(response.body.category).toBe('Development'); // Example expected category
+  });
+
+  test('POST /api/ml/predict-category should handle empty input', async () => {
+    const response = await request(app)
+      .post('/api/ml/predict-category')
+      .send({ text: '' })
+      .expect(400);
+
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.error).toBe('Text is required');
+  });
+
+  test('POST /api/ml/predict-category should handle invalid input', async () => {
+    const response = await request(app)
+      .post('/api/ml/predict-category')
+      .send({})
+      .expect(400);
+
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.error).toBe('Text is required');
+  });
+});
