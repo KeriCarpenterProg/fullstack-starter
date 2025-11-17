@@ -1,5 +1,20 @@
 import request from 'supertest';
 import app from '../src/index';
+import fetch from 'node-fetch';
+
+jest.mock('node-fetch', () => jest.fn());
+
+beforeAll(() => {
+  (fetch as jest.Mock).mockImplementation((url, options) => {
+    if (url === 'http://localhost:5002/predict') {
+      return Promise.resolve({
+        json: () => Promise.resolve({ category: 'Development' }),
+        status: 200,
+      });
+    }
+    return Promise.reject(new Error('Unknown URL'));
+  });
+});
 
 describe('API Health Check', () => {
   test('GET /api/health should return 200', async () => {
