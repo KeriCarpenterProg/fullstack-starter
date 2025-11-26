@@ -28,6 +28,10 @@ RUN if [ ! -f category_classifier.pkl ]; then \
 
 # Default port (overridable)
 ENV PORT=5002
+
+# ML API Key for authentication (optional, set at runtime)
+ENV ML_API_KEY=""
+
 EXPOSE 5002
 
 # Run the service

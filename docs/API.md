@@ -24,6 +24,7 @@ Create a new user account.
 **Endpoint:** `POST /api/auth/signup`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -33,6 +34,7 @@ Create a new user account.
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -46,6 +48,7 @@ Create a new user account.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request` - Invalid input data
 - `409 Conflict` - Email already exists
 
@@ -58,6 +61,7 @@ Authenticate an existing user.
 **Endpoint:** `POST /api/auth/signin`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -66,6 +70,7 @@ Authenticate an existing user.
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -79,6 +84,7 @@ Authenticate an existing user.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Invalid credentials
 - `400 Bad Request` - Missing email or password
 
@@ -99,11 +105,13 @@ Get all projects owned by the authenticated user.
 **Endpoint:** `GET /api/projects`
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -119,6 +127,7 @@ Authorization: Bearer <token>
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Missing or invalid token
 
 ---
@@ -130,11 +139,13 @@ Retrieve a specific project by its ID.
 **Endpoint:** `GET /api/projects/:id`
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": "cmi7zaqka0001u95g5zuqg3z2",
@@ -148,6 +159,7 @@ Authorization: Bearer <token>
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Missing or invalid token
 - `404 Not Found` - Project not found or user doesn't own it
 
@@ -160,12 +172,14 @@ Create a new project.
 **Endpoint:** `POST /api/projects`
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "title": "New Project",
@@ -175,11 +189,13 @@ Content-Type: application/json
 ```
 
 **Fields:**
+
 - `title` (required) - Project title (min 1 character)
 - `description` (optional) - Project description
 - `category` (optional) - Project category (defaults to "uncategorized")
 
 **Response:** `201 Created`
+
 ```json
 {
   "id": "cmi7zaqka0001u95g5zuqg3z2",
@@ -193,6 +209,7 @@ Content-Type: application/json
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Missing or invalid token
 - `400 Bad Request` - Invalid input data (e.g., missing title)
 
@@ -205,12 +222,14 @@ Update an existing project.
 **Endpoint:** `PUT /api/projects/:id`
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "title": "Updated Title",
@@ -222,6 +241,7 @@ Content-Type: application/json
 All fields are optional. Only provided fields will be updated.
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": "cmi7zaqka0001u95g5zuqg3z2",
@@ -235,6 +255,7 @@ All fields are optional. Only provided fields will be updated.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Missing or invalid token
 - `404 Not Found` - Project not found or user doesn't own it
 - `400 Bad Request` - Invalid update data
@@ -248,6 +269,7 @@ Delete a project.
 **Endpoint:** `DELETE /api/projects/:id`
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
@@ -257,6 +279,7 @@ Authorization: Bearer <token>
 No response body is returned on successful deletion.
 
 **Error Responses:**
+
 - `401 Unauthorized` - Missing or invalid token
 - `404 Not Found` - Project not found or user doesn't own it
 
@@ -271,11 +294,13 @@ Get an ML-powered category prediction for text input.
 **Endpoint:** `POST /api/ml/predict-category`
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "text": "Build a new REST API endpoint"
@@ -283,6 +308,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "category": "Development",
@@ -291,6 +317,7 @@ Content-Type: application/json
 ```
 
 **Available Categories:**
+
 - Development
 - Marketing
 - Design
@@ -298,10 +325,12 @@ Content-Type: application/json
 - Operations
 
 **Error Responses:**
+
 - `400 Bad Request` - Missing or empty text field
 - `503 Service Unavailable` - ML service is unavailable or timed out
 
 **Notes:**
+
 - This endpoint does not require authentication
 - The request times out after 4 seconds with one retry attempt
 - Confidence score ranges from 0 to 1
@@ -319,6 +348,7 @@ Get a list of all users in the database.
 **Endpoint:** `GET /api/debug/users`
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -339,6 +369,7 @@ Get a list of all projects with owner information.
 **Endpoint:** `GET /api/debug/projects`
 
 **Response:** `200 OK`
+
 ```json
 [
   {
@@ -365,6 +396,7 @@ Verify the backend server is running.
 **Endpoint:** `GET /api/health`
 
 **Response:** `200 OK`
+
 ```json
 {
   "ok": true
@@ -437,6 +469,7 @@ Currently, there is no rate limiting implemented. This should be added before de
 ## CORS Configuration
 
 The backend accepts requests from:
+
 - `http://localhost:5173` (local development)
 - `*.vercel.app` domains (deployed frontend)
 

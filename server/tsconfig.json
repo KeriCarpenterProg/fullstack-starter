@@ -1,7 +1,13 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests/**/*", "**/*.test.ts", "**/*.spec.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
   "compilerOptions": {
     // File Layout
     "rootDir": "src",
@@ -45,6 +51,6 @@
     "skipLibCheck": true,
 
     "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   }
 }

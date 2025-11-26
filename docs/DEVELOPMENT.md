@@ -83,10 +83,12 @@ fullstack-starter/
 ### Branch Strategy
 
 **Main Branches:**
+
 - `main` - Production-ready code
 - Feature branches - `feature/description` or `username/ISSUE-number`
 
 **Workflow:**
+
 1. Create a branch from `main`
 2. Make changes
 3. Write tests
@@ -108,6 +110,7 @@ type(scope): description
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -117,6 +120,7 @@ type(scope): description
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```
 feat(api): add project category field
 fix(auth): resolve token expiration issue
@@ -151,12 +155,14 @@ test(api): add ML prediction endpoint tests
 ### TypeScript/JavaScript
 
 **Style Guide:**
+
 - 2 spaces indentation
 - Semicolons required
 - Single quotes for strings
 - Trailing commas in objects/arrays
 
 **Linting:**
+
 ```bash
 # Backend
 cd server
@@ -168,6 +174,7 @@ npm run lint
 ```
 
 **Example:**
+
 ```typescript
 // Good
 const getUserProjects = async (userId: string): Promise<Project[]> => {
@@ -180,20 +187,22 @@ const getUserProjects = async (userId: string): Promise<Project[]> => {
 // Avoid
 const getUserProjects = async (userId: string) => {
   const projects = await db.project.findMany({
-    where: { ownerId: userId }
-  })
-  return projects
-}
+    where: { ownerId: userId },
+  });
+  return projects;
+};
 ```
 
 ### Python
 
 **Style Guide:**
+
 - PEP 8 compliant
 - 4 spaces indentation
 - Type hints for function signatures
 
 **Linting:**
+
 ```bash
 cd ml-service
 source venv/bin/activate
@@ -202,6 +211,7 @@ flake8 app.py train_model.py
 ```
 
 **Example:**
+
 ```python
 # Good
 def predict_category(text: str) -> dict:
@@ -209,7 +219,7 @@ def predict_category(text: str) -> dict:
     prediction = model.predict([text])[0]
     probabilities = model.predict_proba([text])[0]
     confidence = float(max(probabilities))
-    
+
     return {
         "category": prediction,
         "confidence": confidence
@@ -219,12 +229,14 @@ def predict_category(text: str) -> dict:
 ### Naming Conventions
 
 **TypeScript:**
+
 - Variables/Functions: `camelCase`
 - Classes/Interfaces: `PascalCase`
 - Constants: `UPPER_CASE`
 - Files: `kebab-case.ts` or `PascalCase.tsx` for components
 
 **Python:**
+
 - Variables/Functions: `snake_case`
 - Classes: `PascalCase`
 - Constants: `UPPER_CASE`
@@ -237,6 +249,7 @@ def predict_category(text: str) -> dict:
 ### Backend Tests
 
 **Run Tests:**
+
 ```bash
 cd server
 npm test                  # Run once
@@ -245,25 +258,26 @@ npm run test:coverage     # With coverage
 ```
 
 **Test Structure:**
+
 ```typescript
-describe('Feature Name', () => {
+describe("Feature Name", () => {
   let authToken: string;
-  
+
   beforeAll(async () => {
     // Setup (create test user, etc.)
   });
-  
+
   afterAll(async () => {
     // Cleanup
   });
-  
-  test('should do something', async () => {
+
+  test("should do something", async () => {
     const response = await request(app)
-      .get('/api/endpoint')
-      .set('Authorization', `Bearer ${authToken}`)
+      .get("/api/endpoint")
+      .set("Authorization", `Bearer ${authToken}`)
       .expect(200);
-    
-    expect(response.body).toHaveProperty('data');
+
+    expect(response.body).toHaveProperty("data");
   });
 });
 ```
@@ -271,14 +285,16 @@ describe('Feature Name', () => {
 **Writing New Tests:**
 
 1. **Create test file:**
+
    ```bash
    touch server/tests/new-feature.test.ts
    ```
 
 2. **Import dependencies:**
+
    ```typescript
-   import request from 'supertest';
-   import app from '../src/index';
+   import request from "supertest";
+   import app from "../src/index";
    ```
 
 3. **Write test cases:**
@@ -302,6 +318,7 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom vitest
 ```
 
 **Example test:**
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
@@ -318,6 +335,7 @@ describe('App', () => {
 ### ML Service Tests
 
 **Manual Testing:**
+
 ```bash
 # Test prediction
 curl -X POST http://localhost:5002/predict \
@@ -329,6 +347,7 @@ curl http://localhost:5002/health
 ```
 
 **To add automated tests:**
+
 ```bash
 cd ml-service
 pip install pytest pytest-asyncio httpx
@@ -344,38 +363,40 @@ pip install pytest pytest-asyncio httpx
 ### Adding a Backend Endpoint
 
 1. **Define route:**
+
    ```typescript
    // server/src/routes/my-feature.ts
-   import { Router } from 'express';
-   import { auth } from '../lib/auth';
-   
+   import { Router } from "express";
+   import { auth } from "../lib/auth";
+
    const router = Router();
-   
-   router.get('/my-endpoint', auth, async (req, res) => {
+
+   router.get("/my-endpoint", auth, async (req, res) => {
      try {
        // Implementation
-       res.json({ data: 'result' });
+       res.json({ data: "result" });
      } catch (e: any) {
        res.status(500).json({ error: e.message });
      }
    });
-   
+
    export default router;
    ```
 
 2. **Register route:**
+
    ```typescript
    // server/src/index.ts
-   import myFeatureRouter from './routes/my-feature';
-   
-   app.use('/api/my-feature', myFeatureRouter);
+   import myFeatureRouter from "./routes/my-feature";
+
+   app.use("/api/my-feature", myFeatureRouter);
    ```
 
 3. **Add tests:**
    ```typescript
    // server/tests/my-feature.test.ts
-   describe('My Feature', () => {
-     test('GET /api/my-feature/my-endpoint', async () => {
+   describe("My Feature", () => {
+     test("GET /api/my-feature/my-endpoint", async () => {
        // Test implementation
      });
    });
@@ -384,6 +405,7 @@ pip install pytest pytest-asyncio httpx
 ### Adding a Database Model
 
 1. **Update Prisma schema:**
+
    ```prisma
    // server/prisma/schema.prisma
    model NewModel {
@@ -395,37 +417,41 @@ pip install pytest pytest-asyncio httpx
    ```
 
 2. **Create migration:**
+
    ```bash
    cd server
    npx prisma migrate dev --name add_new_model
    ```
 
 3. **Generate client:**
+
    ```bash
    npx prisma generate
    ```
 
 4. **Use in code:**
+
    ```typescript
-   import { db } from '../lib/db';
-   
+   import { db } from "../lib/db";
+
    const items = await db.newModel.findMany();
    ```
 
 ### Adding a Frontend Component
 
 1. **Create component:**
+
    ```typescript
    // client/src/components/MyComponent.tsx
    import { useState } from 'react';
-   
+
    interface MyComponentProps {
      title: string;
    }
-   
+
    export function MyComponent({ title }: MyComponentProps) {
      const [count, setCount] = useState(0);
-     
+
      return (
        <div>
          <h2>{title}</h2>
@@ -438,10 +464,11 @@ pip install pytest pytest-asyncio httpx
    ```
 
 2. **Import and use:**
+
    ```typescript
    // client/src/App.tsx
    import { MyComponent } from './components/MyComponent';
-   
+
    function App() {
      return <MyComponent title="Hello" />;
    }
@@ -450,6 +477,7 @@ pip install pytest pytest-asyncio httpx
 ### Extending the ML Model
 
 1. **Add training data:**
+
    ```python
    # ml-service/train_model.py
    training_data = [
@@ -459,11 +487,13 @@ pip install pytest pytest-asyncio httpx
    ```
 
 2. **Retrain model:**
+
    ```bash
    make ml-train
    ```
 
 3. **Test predictions:**
+
    ```bash
    curl -X POST http://localhost:5002/predict \
      -H "Content-Type: application/json" \
@@ -484,6 +514,7 @@ pip install pytest pytest-asyncio httpx
 ### Backend Debugging
 
 **VS Code Launch Configuration:**
+
 ```json
 // .vscode/launch.json
 {
@@ -503,24 +534,28 @@ pip install pytest pytest-asyncio httpx
 ```
 
 **Add breakpoints:**
+
 - Click left of line number in VS Code
 - Run "Debug Backend" configuration
 
 **Console logging:**
+
 ```typescript
-console.log('Debug:', variable);
-console.error('Error:', error);
+console.log("Debug:", variable);
+console.error("Error:", error);
 ```
 
 ### Frontend Debugging
 
 **Browser DevTools:**
+
 - Press F12
 - Use Console, Network, and Elements tabs
 - React DevTools extension recommended
 
 **VS Code Debugging:**
 Install "Debugger for Chrome" extension, then:
+
 ```json
 // .vscode/launch.json
 {
@@ -535,6 +570,7 @@ Install "Debugger for Chrome" extension, then:
 ### Database Debugging
 
 **Prisma Studio:**
+
 ```bash
 cd server
 npx prisma studio
@@ -543,10 +579,11 @@ npx prisma studio
 Opens GUI at http://localhost:5555 to browse/edit database
 
 **SQL Logging:**
+
 ```typescript
 // server/src/lib/db.ts
 export const db = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+  log: ["query", "info", "warn", "error"],
 });
 ```
 
@@ -557,6 +594,7 @@ export const db = new PrismaClient({
 ### Backend
 
 **Database Queries:**
+
 ```typescript
 // Bad: N+1 query problem
 const projects = await db.project.findMany();
@@ -566,24 +604,26 @@ for (const project of projects) {
 
 // Good: Include relation
 const projects = await db.project.findMany({
-  include: { owner: true }
+  include: { owner: true },
 });
 ```
 
 **Caching (Future):**
+
 ```typescript
 // Example with Redis
 const cachedData = await redis.get(key);
 if (cachedData) return JSON.parse(cachedData);
 
 const data = await db.query();
-await redis.set(key, JSON.stringify(data), 'EX', 3600);
+await redis.set(key, JSON.stringify(data), "EX", 3600);
 return data;
 ```
 
 ### Frontend
 
 **Lazy Loading:**
+
 ```typescript
 import { lazy, Suspense } from 'react';
 
@@ -599,15 +639,16 @@ function App() {
 ```
 
 **Debouncing:**
+
 ```typescript
-const [searchTerm, setSearchTerm] = useState('');
-const [debouncedTerm, setDebouncedTerm] = useState('');
+const [searchTerm, setSearchTerm] = useState("");
+const [debouncedTerm, setDebouncedTerm] = useState("");
 
 useEffect(() => {
   const timer = setTimeout(() => {
     setDebouncedTerm(searchTerm);
   }, 500);
-  
+
   return () => clearTimeout(timer);
 }, [searchTerm]);
 
@@ -641,6 +682,7 @@ useEffect(() => {
 ### Making Changes
 
 1. **Keep branch updated:**
+
    ```bash
    git fetch upstream
    git rebase upstream/main
@@ -649,12 +691,14 @@ useEffect(() => {
 2. **Make your changes**
 3. **Test thoroughly**
 4. **Commit:**
+
    ```bash
    git add .
    git commit -m "feat: add new feature"
    ```
 
 5. **Push:**
+
    ```bash
    git push origin feature/my-feature
    ```
@@ -668,6 +712,7 @@ useEffect(() => {
 ### Code Review
 
 **What we look for:**
+
 - ✅ Code follows style guide
 - ✅ Tests are included and passing
 - ✅ Documentation is updated
@@ -675,6 +720,7 @@ useEffect(() => {
 - ✅ Commit messages are clear
 
 **Review Process:**
+
 1. Automated CI checks run
 2. Maintainers review code
 3. Feedback provided

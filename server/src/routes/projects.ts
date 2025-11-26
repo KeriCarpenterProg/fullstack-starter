@@ -14,21 +14,27 @@ const CreateProject = z.object({
   title: z.string().min(1, "Project title is required"),
   description: z.string().optional(),
   // Allow blank or missing category; transform blank -> undefined
-  category: z.string().optional().transform((val) => {
-    if (val === undefined) return undefined;
-    const trimmed = val.trim();
-    return trimmed.length ? trimmed : undefined;
-  }),
+  category: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      const trimmed = val.trim();
+      return trimmed.length ? trimmed : undefined;
+    }),
 });
 
 const UpdateProject = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
-  category: z.string().optional().transform((val) => {
-    if (val === undefined) return undefined;
-    const trimmed = val.trim();
-    return trimmed.length ? trimmed : undefined;
-  }),
+  category: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      const trimmed = val.trim();
+      return trimmed.length ? trimmed : undefined;
+    }),
 });
 
 // GET /api/projects - List user's projects
@@ -64,10 +70,14 @@ router.post("/", async (req, res) => {
   } catch (e: any) {
     // Differentiate validation vs internal errors
     if (e?.name === "ZodError") {
-      return res.status(400).json({ error: "Invalid project data", details: e.errors });
+      return res
+        .status(400)
+        .json({ error: "Invalid project data", details: e.errors });
     }
     console.error("Project create error:", e);
-    return res.status(500).json({ error: "Failed to create project", message: e.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to create project", message: e.message });
   }
 });
 
@@ -82,11 +92,11 @@ router.get("/:id", async (req, res) => {
         ownerId: userId, // Ensure user owns this project
       },
     });
-    
+
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
-    
+
     res.json(project);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -97,7 +107,7 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const input = UpdateProject.parse(req.body);
-    
+
     // Check if project exists and user owns it
     const userId = (req.jwtUser as JwtUser)?.id;
     if (!userId) return res.status(401).json({ error: "Unauthenticated" });
@@ -107,11 +117,11 @@ router.put("/:id", async (req, res) => {
         ownerId: userId,
       },
     });
-    
+
     if (!existingProject) {
       return res.status(404).json({ error: "Project not found" });
     }
-    
+
     const { category, ...rest } = input;
     const project = await db.project.update({
       where: { id: req.params.id },
@@ -120,14 +130,18 @@ router.put("/:id", async (req, res) => {
         ...(category ? { category } : {}),
       },
     });
-    
+
     res.json(project);
   } catch (e: any) {
     if (e?.name === "ZodError") {
-      return res.status(400).json({ error: "Invalid update data", details: e.errors });
+      return res
+        .status(400)
+        .json({ error: "Invalid update data", details: e.errors });
     }
     console.error("Project update error:", e);
-    return res.status(500).json({ error: "Failed to update project", message: e.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to update project", message: e.message });
   }
 });
 
@@ -143,15 +157,15 @@ router.delete("/:id", async (req, res) => {
         ownerId: userId,
       },
     });
-    
+
     if (!existingProject) {
       return res.status(404).json({ error: "Project not found" });
     }
-    
+
     await db.project.delete({
       where: { id: req.params.id },
     });
-    
+
     res.status(204).send(); // No content
   } catch (e: any) {
     res.status(500).json({ error: e.message });

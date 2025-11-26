@@ -59,6 +59,7 @@ This document provides a high-level overview of the fullstack starter applicatio
 - **Styling:** CSS (App.css, index.css)
 
 **Key Features:**
+
 - JWT-based authentication
 - Protected routes
 - ML-powered category suggestions
@@ -75,6 +76,7 @@ This document provides a high-level overview of the fullstack starter applicatio
 - **Testing:** Jest 30.2 + Supertest 7.1
 
 **Key Features:**
+
 - RESTful API design
 - JWT authentication middleware
 - Protected route authorization
@@ -91,6 +93,7 @@ This document provides a high-level overview of the fullstack starter applicatio
 - **Model Persistence:** joblib 1.3
 
 **Key Features:**
+
 - Text classification using Naive Bayes
 - TF-IDF vectorization
 - RESTful prediction API
@@ -104,6 +107,7 @@ This document provides a high-level overview of the fullstack starter applicatio
 - **Migrations:** Managed by Prisma Migrate
 
 **Schema:**
+
 - `User` - User accounts with authentication
 - `Project` - User projects with ML-predicted categories
 
@@ -253,6 +257,7 @@ model Project {
 ```
 
 **Relationships:**
+
 - One User → Many Projects
 - Cascade delete: Deleting a user deletes all their projects
 
@@ -263,11 +268,13 @@ model Project {
 ### Model Architecture
 
 **Algorithm:** Multinomial Naive Bayes
+
 - Suitable for text classification
 - Fast training and prediction
 - Probabilistic output (confidence scores)
 
 **Feature Extraction:** TF-IDF Vectorization
+
 - Converts text to numerical features
 - Max 1000 features
 - N-gram range: (1, 2) for unigrams and bigrams
@@ -275,6 +282,7 @@ model Project {
 ### Training Data
 
 Categories and examples:
+
 - **Development:** API endpoints, bug fixes, coding tasks
 - **Marketing:** Campaigns, content, SEO
 - **Design:** UI/UX, mockups, visual design
@@ -291,6 +299,7 @@ Categories and examples:
 ### Prediction API
 
 **Endpoint:** `/predict`
+
 - **Method:** POST
 - **Input:** `{"text": "string"}`
 - **Output:** `{"category": "string", "confidence": float}`
@@ -306,6 +315,7 @@ Categories and examples:
 **Trigger:** Push to `main` branch
 
 **Jobs:**
+
 1. **test-backend** - Run backend tests with PostgreSQL service
 2. **test-frontend** - Build frontend to verify no errors
 3. **deploy-backend** - Deploy to Railway using CLI
@@ -316,18 +326,21 @@ Categories and examples:
 ### Production Environments
 
 **Backend:** Railway
+
 - Automatic deployments from main
 - Environment variables configured
 - PostgreSQL addon attached
 - Health endpoint: `/api/health`
 
 **Frontend:** Vercel
+
 - Automatic deployments from main
 - Environment variables for API URL
 - CDN distribution
 - HTTPS enabled
 
 **ML Service:** Railway
+
 - Dockerfile-based deployment
 - Model included in container
 - Health endpoint: `/health`
@@ -336,6 +349,7 @@ Categories and examples:
 ### Environment Variables
 
 **Backend (Railway):**
+
 ```
 DATABASE_URL - PostgreSQL connection string (auto-set by Railway)
 JWT_SECRET - Secure random string
@@ -344,6 +358,7 @@ PORT - 4000 (auto-set by Railway)
 ```
 
 **Frontend (Vercel):**
+
 ```
 VITE_API_URL - https://endearing-heart-production.up.railway.app
 ```
@@ -363,12 +378,14 @@ Or use `make dev-all` to start everything at once.
 ### Testing
 
 **Backend Tests:**
+
 ```bash
 cd server
 npm test
 ```
 
 Tests include:
+
 - Health check
 - Authentication (signup, signin)
 - Protected routes
@@ -376,6 +393,7 @@ Tests include:
 - ML prediction proxy
 
 **Test Environment:**
+
 - In-memory PostgreSQL or test database
 - Mocked ML service responses
 - JWT secrets for testing only
@@ -383,17 +401,20 @@ Tests include:
 ### Database Migrations
 
 **Create Migration:**
+
 ```bash
 cd server
 npx prisma migrate dev --name description_of_change
 ```
 
 **Apply in Production:**
+
 ```bash
 npx prisma migrate deploy
 ```
 
 **Reset Database (Dev Only):**
+
 ```bash
 npx prisma migrate reset
 ```

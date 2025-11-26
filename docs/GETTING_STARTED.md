@@ -30,6 +30,7 @@ make all-install
 ```
 
 This will:
+
 - Install backend dependencies (`server/`)
 - Install frontend dependencies (`client/`)
 - Create Python virtual environment and install ML service dependencies (`ml-service/`)
@@ -39,16 +40,19 @@ This will:
 #### Backend Environment
 
 1. Navigate to the `server/` directory:
+
    ```bash
    cd server
    ```
 
 2. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
 
 3. Edit `.env` and configure your settings:
+
    ```env
    DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
    JWT_SECRET="your-secure-random-string-here"
@@ -63,11 +67,13 @@ This will:
 ### 4. Set Up the Database
 
 1. Create your PostgreSQL database:
+
    ```bash
    createdb your_database_name
    ```
 
 2. Run database migrations:
+
    ```bash
    cd server
    npm run migrate
@@ -99,6 +105,7 @@ make dev-all
 ```
 
 This starts:
+
 - ML service on port 5002
 - Backend server on port 4000
 - Frontend client on port 5173
@@ -106,16 +113,19 @@ This starts:
 #### Option B: Manual Start (Separate Terminals)
 
 **Terminal 1 - ML Service:**
+
 ```bash
 make ml-run
 ```
 
 **Terminal 2 - Backend:**
+
 ```bash
 make dev-server
 ```
 
 **Terminal 3 - Frontend:**
+
 ```bash
 make dev-client
 ```
@@ -137,8 +147,9 @@ curl http://localhost:4000/api/health
 ```
 
 Expected response:
+
 ```json
-{"ok": true}
+{ "ok": true }
 ```
 
 ### Test ML Service Health
@@ -148,6 +159,7 @@ curl http://localhost:5002/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -164,6 +176,7 @@ curl -X POST http://localhost:5002/predict \
 ```
 
 Expected response:
+
 ```json
 {
   "category": "Development",
@@ -178,10 +191,11 @@ Expected response:
 If you see `ECONNREFUSED` or database connection errors:
 
 1. Ensure PostgreSQL is running:
+
    ```bash
    # macOS
    brew services list
-   
+
    # Linux
    sudo systemctl status postgresql
    ```

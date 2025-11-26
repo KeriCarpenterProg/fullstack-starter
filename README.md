@@ -25,18 +25,19 @@ A modern, production-ready full-stack application with React, Express, PostgreSQ
 
 Comprehensive documentation is available in the `docs/` directory:
 
-| Document | Description |
-|----------|-------------|
+| Document                                         | Description                                                       |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
 | **[Getting Started](./docs/GETTING_STARTED.md)** | Detailed setup instructions, prerequisites, and quick start guide |
-| **[API Documentation](./docs/API.md)** | Complete API reference with request/response examples |
-| **[Architecture](./docs/ARCHITECTURE.md)** | System design, data flow, and technology stack overview |
-| **[Development Guide](./docs/DEVELOPMENT.md)** | Contributing guidelines, code style, and best practices |
-| **[Deployment](./docs/DEPLOYMENT.md)** | Production deployment instructions for Railway and Vercel |
-| **[Troubleshooting](./docs/TROUBLESHOOTING.md)** | Common issues and their solutions |
+| **[API Documentation](./docs/API.md)**           | Complete API reference with request/response examples             |
+| **[Architecture](./docs/ARCHITECTURE.md)**       | System design, data flow, and technology stack overview           |
+| **[Development Guide](./docs/DEVELOPMENT.md)**   | Contributing guidelines, code style, and best practices           |
+| **[Deployment](./docs/DEPLOYMENT.md)**           | Production deployment instructions for Railway and Vercel         |
+| **[Troubleshooting](./docs/TROUBLESHOOTING.md)** | Common issues and their solutions                                 |
 
 ## 🛠️ Tech Stack
 
 ### Frontend (`client/`)
+
 - **React 19.1** with TypeScript for type-safe UI development
 - **Vite 7.1** for lightning-fast builds and hot reload
 - **Axios** for HTTP requests
@@ -44,6 +45,7 @@ Comprehensive documentation is available in the `docs/` directory:
 - **CSS3** with modern gradients and responsive design
 
 ### Backend (`server/`)
+
 - **Express 5** with TypeScript
 - **Prisma ORM 6.18** for type-safe database access
 - **PostgreSQL 15+** database
@@ -52,6 +54,7 @@ Comprehensive documentation is available in the `docs/` directory:
 - **Jest + Supertest** for integration testing
 
 ### ML Service (`ml-service/`)
+
 - **FastAPI 0.104** for high-performance API
 - **scikit-learn 1.3** for machine learning
 - **Naive Bayes** text classification algorithm
@@ -59,6 +62,7 @@ Comprehensive documentation is available in the `docs/` directory:
 - **Docker** containerization
 
 ### DevOps & Infrastructure
+
 - **GitHub Actions** - Automated CI/CD pipeline
 - **Railway** - Backend API, ML service, and PostgreSQL hosting
 - **Vercel** - Frontend hosting with edge network
@@ -202,6 +206,7 @@ cd server && npx prisma studio     # Open Prisma Studio GUI
 ## 🔧 Environment Variables
 
 ### Backend (`server/.env`)
+
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 JWT_SECRET="your-secure-random-string"
@@ -210,6 +215,7 @@ ML_SERVICE_URL="http://localhost:5002"
 ```
 
 ### Frontend (development)
+
 ```env
 VITE_API_URL="http://localhost:4000"
 ```
@@ -217,6 +223,7 @@ VITE_API_URL="http://localhost:4000"
 ## 📖 Key Features Explained
 
 ### Authentication Flow
+
 1. User signs up with email/password
 2. Password is hashed with bcrypt
 3. JWT token issued with 7-day expiration
@@ -224,6 +231,7 @@ VITE_API_URL="http://localhost:4000"
 5. Protected routes require valid token
 
 ### ML-Powered Categorization
+
 1. User types project description
 2. Frontend debounces request (500ms)
 3. Backend proxies to ML service with timeout/retry
@@ -232,6 +240,7 @@ VITE_API_URL="http://localhost:4000"
 6. User can accept or override suggestion
 
 ### Project Management
+
 - Create projects with title, description, and category
 - View all your projects
 - Update project details
@@ -248,6 +257,7 @@ npm test
 ```
 
 **Test Coverage:**
+
 - ✅ Health check endpoint
 - ✅ User signup and signin
 - ✅ JWT authentication
@@ -264,6 +274,7 @@ See [API Documentation](./docs/API.md) for curl examples and test workflows.
 The application is configured for automated deployment:
 
 **On push to `main` branch:**
+
 1. GitHub Actions runs tests
 2. Backend deployed to Railway
 3. Frontend deployed to Vercel
@@ -277,6 +288,7 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
 Contributions are welcome! Please read the [Development Guide](./docs/DEVELOPMENT.md) before contributing.
 
 **Process:**
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -301,6 +313,7 @@ MIT License - see LICENSE file for details
 ## 🙏 Acknowledgments
 
 Built with modern web technologies and best practices:
+
 - React team for the amazing framework
 - Prisma for excellent DX with databases
 - FastAPI for high-performance Python APIs

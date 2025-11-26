@@ -5,8 +5,9 @@ This guide explains how to deploy the fullstack starter application to productio
 ## Deployment Options
 
 This application is configured to deploy to:
+
 - **Backend:** Railway
-- **Frontend:** Vercel  
+- **Frontend:** Vercel
 - **ML Service:** Railway
 - **Database:** Railway (PostgreSQL addon)
 
@@ -20,6 +21,7 @@ Before deploying, ensure you have:
    - [GitHub](https://github.com/)
 
 2. Command-line tools installed:
+
    ```bash
    npm install -g @railway/cli
    npm install -g vercel
@@ -50,6 +52,7 @@ Before deploying, ensure you have:
 Create three services in Railway:
 
 **Backend Service:**
+
 1. Click "+ New" → "GitHub Repo"
 2. Select your repository
 3. Name it "backend"
@@ -58,6 +61,7 @@ Create three services in Railway:
 6. Set start command: `npm start`
 
 **ML Service:**
+
 1. Click "+ New" → "GitHub Repo"
 2. Select your repository
 3. Name it "ml-service"
@@ -90,6 +94,7 @@ PORT                # Auto-set by Railway
 ```
 
 **How to set:**
+
 1. Click on backend service
 2. Go to "Variables" tab
 3. Click "New Variable"
@@ -105,6 +110,7 @@ VITE_API_URL        # URL of backend (e.g., https://backend-production.up.railwa
 ```
 
 **How to set:**
+
 1. Go to project settings
 2. Click "Environment Variables"
 3. Add variable for Production environment
@@ -133,16 +139,19 @@ ML_SERVICE_URL          # Full URL of deployed ML service
 ```
 
 **Getting Railway API Key:**
+
 1. Go to https://railway.app/account/tokens
 2. Click "Create token"
 3. Copy and save securely
 
 **Getting Railway Project ID:**
+
 1. Open your Railway project
 2. Go to Settings
 3. Copy "Project ID"
 
 **Getting Vercel Token:**
+
 1. Go to https://vercel.com/account/tokens
 2. Create a new token
 3. Copy and save securely
@@ -203,6 +212,7 @@ Once GitHub secrets are configured, deployments happen automatically:
 **Trigger:** Push to `main` branch
 
 **Pipeline Steps:**
+
 1. Run backend tests
 2. Build frontend
 3. Deploy backend to Railway
@@ -211,11 +221,13 @@ Once GitHub secrets are configured, deployments happen automatically:
 6. Run health checks
 
 **View Progress:**
+
 - Go to your GitHub repository
 - Click "Actions" tab
 - Watch workflow execution
 
 **If Deployment Fails:**
+
 1. Click on failed job
 2. Review error logs
 3. Fix the issue
@@ -245,12 +257,14 @@ The `prisma-start.js` script handles migrations before starting the server.
 When you add new migrations:
 
 1. Create migration locally:
+
    ```bash
    cd server
    npx prisma migrate dev --name add_new_field
    ```
 
 2. Commit and push to GitHub:
+
    ```bash
    git add prisma/migrations
    git commit -m "Add new migration"
@@ -278,8 +292,9 @@ curl https://your-backend-url.up.railway.app/api/health
 ```
 
 Expected response:
+
 ```json
-{"ok": true}
+{ "ok": true }
 ```
 
 ### 2. Check ML Service Health
@@ -289,6 +304,7 @@ curl https://your-ml-service-url.up.railway.app/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -299,6 +315,7 @@ Expected response:
 ### 3. Check Frontend
 
 Visit your Vercel URL in a browser and:
+
 - Sign up for an account
 - Create a project
 - Verify ML suggestions work
@@ -334,6 +351,7 @@ curl -X POST https://your-backend-url/api/projects \
 ### Railway Logs
 
 **View Logs:**
+
 1. Go to Railway dashboard
 2. Click on a service
 3. Click "Deployments" tab
@@ -341,6 +359,7 @@ curl -X POST https://your-backend-url/api/projects \
 5. View logs in real-time
 
 **Or via CLI:**
+
 ```bash
 railway logs --service backend
 ```
@@ -348,6 +367,7 @@ railway logs --service backend
 ### Vercel Logs
 
 **View Logs:**
+
 1. Go to Vercel dashboard
 2. Click on your project
 3. Click "Deployments"
@@ -359,6 +379,7 @@ railway logs --service backend
 Set up automated health checks (optional):
 
 **Using UptimeRobot:**
+
 1. Sign up at https://uptimerobot.com
 2. Add monitors for:
    - `https://your-backend-url/api/health`
@@ -373,11 +394,13 @@ Set up automated health checks (optional):
 ### Railway Scaling
 
 **Vertical Scaling:**
+
 1. Go to service settings
 2. Adjust resources under "Settings" → "Resources"
 3. Increase memory/CPU as needed
 
 **Horizontal Scaling:**
+
 - Railway Pro plan required
 - Contact Railway support for multi-instance setup
 
@@ -395,6 +418,7 @@ datasource db {
 ```
 
 **Database Upgrades:**
+
 1. Go to Railway database service
 2. Upgrade to larger instance
 3. Railway handles migration automatically
@@ -406,15 +430,18 @@ datasource db {
 ### Railway (Backend + ML + Database)
 
 **Free Tier:**
+
 - $5 credit per month
 - Good for testing
 
 **Pro Plan:**
+
 - $20/month
 - Includes $20 usage credit
 - Pay-as-you-go after credits
 
 **Typical Costs:**
+
 - Backend: ~$5-10/month
 - ML Service: ~$5-10/month
 - PostgreSQL: ~$5-10/month
@@ -423,14 +450,17 @@ datasource db {
 ### Vercel (Frontend)
 
 **Hobby Tier:**
+
 - Free for personal projects
 - 100GB bandwidth/month
 
 **Pro Tier:**
+
 - $20/month
 - 1TB bandwidth/month
 
 **Typical Costs:**
+
 - Free for most personal projects
 - Pro if you need more bandwidth
 
@@ -446,12 +476,14 @@ datasource db {
 ### Railway Rollback
 
 **Via Dashboard:**
+
 1. Go to service
 2. Click "Deployments"
 3. Find previous working deployment
 4. Click "..." → "Redeploy"
 
 **Via CLI:**
+
 ```bash
 railway rollback
 ```
@@ -459,6 +491,7 @@ railway rollback
 ### Vercel Rollback
 
 **Via Dashboard:**
+
 1. Go to project
 2. Click "Deployments"
 3. Find previous working deployment
@@ -503,16 +536,19 @@ railway rollback
 ### Regular Tasks
 
 **Weekly:**
+
 - Check error logs
 - Monitor health checks
 - Review performance metrics
 
 **Monthly:**
+
 - Update dependencies
 - Check for security vulnerabilities
 - Review costs
 
 **Quarterly:**
+
 - Rotate secrets/tokens
 - Database backup verification
 - Performance optimization review
@@ -540,6 +576,7 @@ npm install
 ### Database Backups
 
 **Railway:**
+
 - Automatic daily backups
 - Restore via Railway dashboard:
   1. Go to database service
@@ -547,6 +584,7 @@ npm install
   3. Select backup to restore
 
 **Manual Backup:**
+
 ```bash
 # Export database
 railway run pg_dump -F c -b -v -f backup.dump
