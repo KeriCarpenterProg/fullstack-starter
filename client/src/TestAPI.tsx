@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import { authAPI, projectsAPI } from './services/api';
+import { useState } from "react";
+import { authAPI, projectsAPI } from "./services/api";
 
 function TestAPI() {
-  const [result, setResult] = useState<string>('');
+  const [result, setResult] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const testSignin = async () => {
     setLoading(true);
     try {
-      const auth = await authAPI.signin('kericarpenter@gmail.com', 'password123');
+      const auth = await authAPI.signin(
+        "kericarpenter@gmail.com",
+        "password123",
+      );
       setResult(`✅ Signin success! Token: ${auth.token.substring(0, 20)}...`);
-      localStorage.setItem('token', auth.token);
+      localStorage.setItem("token", auth.token);
     } catch (error) {
       setResult(`❌ Signin failed: ${error}`);
     }
@@ -21,7 +24,9 @@ function TestAPI() {
     setLoading(true);
     try {
       const projects = await projectsAPI.getProjects();
-      setResult(`✅ Found ${projects.length} projects: ${JSON.stringify(projects, null, 2)}`);
+      setResult(
+        `✅ Found ${projects.length} projects: ${JSON.stringify(projects, null, 2)}`,
+      );
     } catch (error) {
       setResult(`❌ Get projects failed: ${error}`);
     }
@@ -31,7 +36,10 @@ function TestAPI() {
   const testCreateProject = async () => {
     setLoading(true);
     try {
-      const project = await projectsAPI.createProject('Frontend Test Project', 'Created from React!');
+      const project = await projectsAPI.createProject(
+        "Frontend Test Project",
+        "Created from React!",
+      );
       setResult(`✅ Created project: ${JSON.stringify(project, null, 2)}`);
     } catch (error) {
       setResult(`❌ Create project failed: ${error}`);
@@ -40,7 +48,7 @@ function TestAPI() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'monospace' }}>
+    <div style={{ padding: "20px", fontFamily: "monospace" }}>
       <h2>API Test</h2>
       <button onClick={testSignin} disabled={loading}>
         Test Signin
@@ -51,10 +59,12 @@ function TestAPI() {
       <button onClick={testCreateProject} disabled={loading}>
         Test Create Project
       </button>
-      
+
       {loading && <p>Loading...</p>}
-      
-      <pre style={{ background: '#f5f5f5', padding: '10px', marginTop: '20px' }}>
+
+      <pre
+        style={{ background: "#f5f5f5", padding: "10px", marginTop: "20px" }}
+      >
         {result}
       </pre>
     </div>

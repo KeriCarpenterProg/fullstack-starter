@@ -8,15 +8,13 @@ import oauthRouter from "./routes/oauth";
 import { auth } from "./lib/auth";
 import { db } from "./lib/db";
 
-
 const app = express();
-app.use(cors({ 
-  origin: [
-    "http://localhost:5173",
-    /^https:\/\/.*\.vercel\.app$/
-  ], 
-  credentials: true 
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", /^https:\/\/.*\.vercel\.app$/],
+    credentials: true,
+  }),
+);
 app.use(json());
 
 // Health check
@@ -24,15 +22,15 @@ app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 // Debug endpoints (temporary - remove in production)
 app.get("/api/debug/users", async (_req, res) => {
-  const users = await db.user.findMany({ 
-    select: { id: true, email: true, name: true, createdAt: true } 
+  const users = await db.user.findMany({
+    select: { id: true, email: true, name: true, createdAt: true },
   });
   res.json(users);
 });
 
 app.get("/api/debug/projects", async (_req, res) => {
   const projects = await db.project.findMany({
-    include: { owner: { select: { email: true } } }
+    include: { owner: { select: { email: true } } },
   });
   res.json(projects);
 });
@@ -56,15 +54,25 @@ app.post("/api/ml/predict-category", async (req, res) => {
 
   const baseUrl = process.env.ML_SERVICE_URL || "http://localhost:5002";
   const url = `${baseUrl.replace(/\/$/, "")}/predict`;
+  const mlApiKey = process.env.ML_API_KEY;
 
   // Timeout + single retry strategy
   const attemptFetch = async (attempt: number): Promise<Response> => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      // Add API key if configured
+      if (mlApiKey) {
+        headers["X-API-Key"] = mlApiKey;
+      }
+
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ text }),
         signal: controller.signal,
       });
@@ -88,7 +96,8 @@ app.post("/api/ml/predict-category", async (req, res) => {
     console.error("ML service error:", error);
     res.status(503).json({
       error: "ML service unavailable",
-      message: error.name === "AbortError" ? "ML request timed out" : error.message,
+      message:
+        error.name === "AbortError" ? "ML request timed out" : error.message,
     });
   }
 });
@@ -108,7 +117,9 @@ if (require.main === module) {
     if (mlUrl) {
       console.log(`ML service URL configured: ${mlUrl}`);
     } else {
-      console.warn("ML_SERVICE_URL not set; falling back to http://localhost:5002. Set ML_SERVICE_URL in server/.env or deployment env vars.");
+      console.warn(
+        "ML_SERVICE_URL not set; falling back to http://localhost:5002. Set ML_SERVICE_URL in server/.env or deployment env vars.",
+      );
     }
   });
 }

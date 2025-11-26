@@ -1,33 +1,39 @@
-import { useState, useEffect } from 'react';
-import { authAPI, projectsAPI, mlAPI } from './services/api';
-import type { Project, MlPrediction } from './types';
-import { useDebounce } from './hooks/useDebounce';
-import './App.css';
+import { useState, useEffect } from "react";
+import { authAPI, projectsAPI, mlAPI } from "./services/api";
+import type { Project, MlPrediction } from "./types";
+import { useDebounce } from "./hooks/useDebounce";
+import "./App.css";
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'dashboard'>('login');
-  
+  const [activeTab, setActiveTab] = useState<"login" | "signup" | "dashboard">(
+    "login",
+  );
+
   // Form states
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [newProjectTitle, setNewProjectTitle] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
-  const [newProjectCategory, setNewProjectCategory] = useState('uncategorized');
-  const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
-  const [suggestedConfidence, setSuggestedConfidence] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [newProjectTitle, setNewProjectTitle] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [newProjectCategory, setNewProjectCategory] = useState("uncategorized");
+  const [suggestedCategory, setSuggestedCategory] = useState<string | null>(
+    null,
+  );
+  const [suggestedConfidence, setSuggestedConfidence] = useState<number | null>(
+    null,
+  );
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const debouncedDescription = useDebounce(newProjectDescription, 600);
 
   // Check if user is already logged in
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      setActiveTab('dashboard');
+      setActiveTab("dashboard");
       loadProjects();
     }
   }, []);
@@ -37,9 +43,9 @@ function App() {
     setLoading(true);
     try {
       const auth = await authAPI.signin(email, password);
-      localStorage.setItem('token', auth.token);
+      localStorage.setItem("token", auth.token);
       setUser(auth.user);
-      setActiveTab('dashboard');
+      setActiveTab("dashboard");
       await loadProjects();
     } catch (error) {
       alert(`Signin failed: ${error}`);
@@ -52,9 +58,9 @@ function App() {
     setLoading(true);
     try {
       const auth = await authAPI.signup(email, password, name);
-      localStorage.setItem('token', auth.token);
+      localStorage.setItem("token", auth.token);
       setUser(auth.user);
-      setActiveTab('dashboard');
+      setActiveTab("dashboard");
       await loadProjects();
     } catch (error) {
       alert(`Signup failed: ${error}`);
@@ -63,13 +69,13 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setUser(null);
     setProjects([]);
-    setActiveTab('login');
-    setEmail('');
-    setPassword('');
-    setName('');
+    setActiveTab("login");
+    setEmail("");
+    setPassword("");
+    setName("");
   };
 
   const loadProjects = async () => {
@@ -77,7 +83,7 @@ function App() {
       const projectList = await projectsAPI.getProjects();
       setProjects(projectList);
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      console.error("Failed to load projects:", error);
     }
   };
 
@@ -85,10 +91,14 @@ function App() {
     e.preventDefault();
     setLoading(true);
     try {
-      await projectsAPI.createProject(newProjectTitle, newProjectDescription, newProjectCategory);
-      setNewProjectTitle('');
-      setNewProjectDescription('');
-      setNewProjectCategory('uncategorized');
+      await projectsAPI.createProject(
+        newProjectTitle,
+        newProjectDescription,
+        newProjectCategory,
+      );
+      setNewProjectTitle("");
+      setNewProjectDescription("");
+      setNewProjectCategory("uncategorized");
       setSuggestedCategory(null);
       setSuggestedConfidence(null);
       await loadProjects();
@@ -112,9 +122,10 @@ function App() {
       setSuggestionLoading(true);
       setSuggestionError(null);
       try {
-        const prediction: MlPrediction = await mlAPI.predictCategory(debouncedDescription);
+        const prediction: MlPrediction =
+          await mlAPI.predictCategory(debouncedDescription);
         if (cancelled) return;
-        console.log('ML Prediction:', prediction); // Add this line
+        console.log("ML Prediction:", prediction); // Add this line
         console.log("Suggested Category:", prediction.category);
         console.log("Suggested Confidence:", prediction.confidence);
         setSuggestedCategory(prediction.category);
@@ -122,16 +133,17 @@ function App() {
         setSuggestedConfidence(prediction.confidence);
       } catch (err: any) {
         if (!cancelled) {
-          setSuggestionError(err.message || 'Failed to get suggestion');
+          setSuggestionError(err.message || "Failed to get suggestion");
           setSuggestedCategory(null);
           setSuggestedConfidence(null);
         }
       } finally {
         !cancelled && setSuggestionLoading(false);
       }
-      
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedDescription]);
 
   const acceptSuggestion = () => {
@@ -150,24 +162,24 @@ function App() {
     <div className="auth-container">
       <div className="auth-card">
         <h1>🚀 Project Manager</h1>
-        
+
         <div className="tab-buttons">
-          <button 
-            className={activeTab === 'login' ? 'active' : ''}
-            onClick={() => setActiveTab('login')}
+          <button
+            className={activeTab === "login" ? "active" : ""}
+            onClick={() => setActiveTab("login")}
           >
             Login
           </button>
-          <button 
-            className={activeTab === 'signup' ? 'active' : ''}
-            onClick={() => setActiveTab('signup')}
+          <button
+            className={activeTab === "signup" ? "active" : ""}
+            onClick={() => setActiveTab("signup")}
           >
             Sign Up
           </button>
         </div>
 
-        <form onSubmit={activeTab === 'login' ? handleSignin : handleSignup}>
-          {activeTab === 'signup' && (
+        <form onSubmit={activeTab === "login" ? handleSignin : handleSignup}>
+          {activeTab === "signup" && (
             <div className="form-group">
               <label htmlFor="name">Name</label>
               <input
@@ -179,7 +191,7 @@ function App() {
               />
             </div>
           )}
-          
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -191,7 +203,7 @@ function App() {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -203,9 +215,13 @@ function App() {
               required
             />
           </div>
-          
+
           <button type="submit" disabled={loading} className="primary-button">
-            {loading ? '⏳ Please wait...' : (activeTab === 'login' ? 'Login' : 'Sign Up')}
+            {loading
+              ? "⏳ Please wait..."
+              : activeTab === "login"
+                ? "Login"
+                : "Sign Up"}
           </button>
         </form>
       </div>
@@ -217,7 +233,7 @@ function App() {
       <header className="dashboard-header">
         <h1>🚀 My Projects</h1>
         <div className="user-info">
-          <span>Welcome, {user?.email || 'User'}!</span>
+          <span>Welcome, {user?.email || "User"}!</span>
           <button onClick={handleLogout} className="logout-button">
             Logout
           </button>
@@ -248,15 +264,21 @@ function App() {
                 onChange={(e) => setNewProjectCategory(e.target.value)}
                 placeholder="Category (or accept suggestion)"
               />
-              
-              <button type="submit" disabled={loading} className="primary-button">
-                {loading ? '⏳' : '+ Add Project'}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="primary-button"
+              >
+                {loading ? "⏳" : "+ Add Project"}
               </button>
             </div>
             {/* Suggestion panel */}
             {(suggestionLoading || suggestedCategory || suggestionError) && (
               <div className="suggestion-panel">
-                {suggestionLoading && <p className="muted">Predicting category...</p>}
+                {suggestionLoading && (
+                  <p className="muted">Predicting category...</p>
+                )}
                 {!suggestionLoading && suggestionError && (
                   <p className="error-text">{suggestionError}</p>
                 )}
@@ -264,11 +286,26 @@ function App() {
                   <div className="suggestion-box">
                     <strong>Suggested:</strong> {suggestedCategory}
                     {suggestedConfidence !== null && (
-                      <small> (confidence {(suggestedConfidence * 100).toFixed(1)}%)</small>
+                      <small>
+                        {" "}
+                        (confidence {(suggestedConfidence * 100).toFixed(1)}%)
+                      </small>
                     )}
                     <div className="suggestion-actions">
-                      <button type="button" onClick={acceptSuggestion} className="accept-btn">Accept</button>
-                      <button type="button" onClick={dismissSuggestion} className="dismiss-btn">Dismiss</button>
+                      <button
+                        type="button"
+                        onClick={acceptSuggestion}
+                        className="accept-btn"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        onClick={dismissSuggestion}
+                        className="dismiss-btn"
+                      >
+                        Dismiss
+                      </button>
                     </div>
                   </div>
                 )}
@@ -288,10 +325,16 @@ function App() {
               {projects.map((project) => (
                 <div key={project.id} className="project-card">
                   <h3>{project.title}</h3>
-                  <p>{project.description || 'No description'}</p>
+                  <p>{project.description || "No description"}</p>
                   <div className="project-meta">
-                    <small>Category: {project.category || 'uncategorized'}</small><br />
-                    <small>Created: {new Date(project.createdAt).toLocaleDateString()}</small>
+                    <small>
+                      Category: {project.category || "uncategorized"}
+                    </small>
+                    <br />
+                    <small>
+                      Created:{" "}
+                      {new Date(project.createdAt).toLocaleDateString()}
+                    </small>
                   </div>
                 </div>
               ))}
@@ -302,10 +345,9 @@ function App() {
     </div>
   );
 
-
   return (
     <div className="app">
-      {activeTab === 'dashboard' ? renderDashboard() : renderAuth()}
+      {activeTab === "dashboard" ? renderDashboard() : renderAuth()}
       {/* <button onClick={() => setSuggestionLoading(true)}>Simulate Loading</button> */}
     </div>
   );

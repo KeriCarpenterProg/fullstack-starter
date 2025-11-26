@@ -21,7 +21,7 @@ export function sign(user: JwtUser) {
 export const auth: RequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const header = req.headers.authorization; // "Bearer <token>"
   if (!header) return res.status(401).json({ error: "Missing Authorization" });
@@ -38,8 +38,13 @@ export const auth: RequestHandler = (
     const decoded = jwt.verify(token, JWT_SECRET);
 
     // Type guard to ensure we have the right shape
-    if (typeof decoded === "object" && decoded !== null && "id" in decoded && "email" in decoded) {
-  req.jwtUser = decoded as JwtUser;
+    if (
+      typeof decoded === "object" &&
+      decoded !== null &&
+      "id" in decoded &&
+      "email" in decoded
+    ) {
+      req.jwtUser = decoded as JwtUser;
       next();
     } else {
       res.status(401).json({ error: "Invalid token payload" });

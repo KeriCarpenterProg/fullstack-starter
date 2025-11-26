@@ -1,13 +1,13 @@
-import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { db } from './db';
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { db } from "./db";
 
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: '/api/oauth/google/callback',
+      callbackURL: "/api/oauth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -42,10 +42,10 @@ passport.use(
         user = await db.user.create({
           data: {
             googleId: profile.id,
-            email: email || '',
+            email: email || "",
             name: profile.displayName,
             // No password needed for OAuth users
-            password: null, 
+            password: null,
           },
         });
 
@@ -53,8 +53,8 @@ passport.use(
       } catch (error) {
         return done(error as Error, undefined);
       }
-    }
-  )
+    },
+  ),
 );
 
 export default passport;
