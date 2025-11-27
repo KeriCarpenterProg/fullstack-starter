@@ -49,8 +49,14 @@ jobs:
       - name: Migrate Database
         run: cd server && npx prisma migrate deploy
 
-      - name: Run Tests
-        run: cd server && npm test -- --verbose
+      - name: Start mock ML server and run tests
+        run: |
+          cd server
+          # start mock in background and give it a moment to bind to the port
+          node mock-ml.js & 
+          sleep 1
+          # run tests with ML_SERVICE_URL forced to use IPv4
+          ML_SERVICE_URL=http://127.0.0.1:5002 npm test -- --verbose
 
   test-frontend:
     name: Test Frontend
