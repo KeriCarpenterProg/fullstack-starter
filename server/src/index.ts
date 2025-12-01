@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { json } from "express";
+import morgan from "morgan";
 import authRouter from "./routes/auth";
 import projectRouter from "./routes/projects";
 import oauthRouter from "./routes/oauth";
@@ -48,6 +49,11 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(json());
+
+// Request logging
+// Use 'combined' for production, 'dev' for development
+const logFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+app.use(morgan(logFormat));
 
 // Health check
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
