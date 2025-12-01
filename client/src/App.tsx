@@ -108,6 +108,19 @@ function App() {
     setLoading(false);
   };
 
+  const handleDeleteProject = async (projectId: string, projectTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${projectTitle}"?`)) {
+      return;
+    }
+    
+    try {
+      await projectsAPI.deleteProject(projectId);
+      await loadProjects();
+    } catch (error) {
+      alert(`Failed to delete project: ${error}`);
+    }
+  };
+
   // Fetch ML category suggestion when description changes (debounced)
   useEffect(() => {
     // Basic guard: avoid predictions for very short or empty text
@@ -324,7 +337,16 @@ function App() {
             <div className="projects-grid">
               {projects.map((project) => (
                 <div key={project.id} className="project-card">
-                  <h3>{project.title}</h3>
+                  <div className="project-card-header">
+                    <h3>{project.title}</h3>
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDeleteProject(project.id, project.title)}
+                      title="Delete project"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                   <p>{project.description || "No description"}</p>
                   <div className="project-meta">
                     <small>
