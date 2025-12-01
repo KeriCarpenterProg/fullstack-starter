@@ -4,8 +4,18 @@ const app = express();
 app.use(express.json());
 
 app.post("/predict", (req, res) => {
-  // return the shape your tests expect
-  res.json({ category: "ci-mock", score: 0.9 });
+  // Return the shape your tests expect (matching real ML service)
+  res.json({
+    category: "Development",
+    confidence: 0.85,
+    all_probabilities: {
+      Development: 0.85,
+      Design: 0.05,
+      Marketing: 0.04,
+      Operations: 0.03,
+      Research: 0.03
+    }
+  });
 });
 
 const port = process.env.MOCK_ML_PORT || 5002;
