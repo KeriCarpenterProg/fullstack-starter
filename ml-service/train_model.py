@@ -6,60 +6,31 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 import joblib
+import os
 
-# Sample training data
-# In production, you'd load this from your database
-training_data = [
-    # Development
-    ("Test", "Development"),
-    ("Development", "Development"),
-    ("Build new API endpoint for user authentication", "Development"),
-    ("Fix bug in payment processing", "Development"),
-    ("Implement React component for dashboard", "Development"),
-    ("Set up CI/CD pipeline", "Development"),
-    ("Refactor database queries", "Development"),
-    ("Add TypeScript types", "Development"),
+# Load training data from CSV file
+def load_training_data(csv_path='training_data.csv'):
+    """Load training data from a CSV file with 'text' and 'category' columns."""
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"Training data file not found: {csv_path}")
     
-    # Marketing
-    ("Marketing", "Marketing"),
-    ("Create social media campaign", "Marketing"),    
-    ("Design email newsletter", "Marketing"),
-    ("Plan product launch strategy", "Marketing"),
-    ("Analyze user engagement metrics", "Marketing"),
-    ("Write blog post about features", "Marketing"),
-    ("SEO optimization for landing page", "Marketing"),
+    df = pd.read_csv(csv_path)
     
-    # Design
-    ("Design", "Design"),
-    ("Design new logo", "Design"),
-    ("Create wireframes for mobile app", "Design"),
-    ("Update color scheme", "Design"),
-    ("Design marketing materials", "Design"),
-    ("Create UI mockups", "Design"),
-    ("Redesign user profile page", "Design"),
+    # Validate required columns
+    if 'text' not in df.columns or 'category' not in df.columns:
+        raise ValueError("CSV must have 'text' and 'category' columns")
     
-    # Research
-    ("Research", "Research"),
-    ("Research competitor features", "Research"),
-    ("User research interviews", "Research"),
-    ("Analyze market trends", "Research"),
-    ("Investigate new technologies", "Research"),
-    ("Study user behavior patterns", "Research"),
-    ("Benchmark performance", "Research"),
+    # Remove any rows with missing values
+    df = df.dropna()
     
-    # Operations
-    ("Operations", "Operations"),
-    ("Set up monitoring dashboard", "Operations"),
-    ("Configure cloud infrastructure", "Operations"),
-    ("Implement backup strategy", "Operations"),
-    ("Optimize server performance", "Operations"),
-    ("Database maintenance", "Operations"),
-    ("Update security policies", "Operations"),
-]
+    print(f"Loaded {len(df)} training examples from {csv_path}")
+    print(f"Categories: {df['category'].unique().tolist()}")
+    print(f"Distribution:\n{df['category'].value_counts()}")
+    
+    return df['text'].tolist(), df['category'].tolist()
 
-# Prepare data
-texts = [item[0] for item in training_data]
-labels = [item[1] for item in training_data]
+# Load data
+texts, labels = load_training_data()
 
 # Create and train pipeline
 model = Pipeline([
@@ -70,9 +41,11 @@ model = Pipeline([
 print("Training model...")
 model.fit(texts, labels)
 
-# Save the model
+# Save the model with version
+# Save both non-versioned (for compatibility) and versioned (for API)
 joblib.dump(model, 'category_classifier.pkl')
-print("Model saved to category_classifier.pkl")
+joblib.dump(model, 'category_classifier_v1.pkl')
+print("Model saved to category_classifier.pkl and category_classifier_v1.pkl")
 
 # Test predictions
 test_cases = [

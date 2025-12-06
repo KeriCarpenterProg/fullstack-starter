@@ -1,0 +1,68 @@
+text,category
+Test,Development
+Development,Development
+Build new API endpoint for user authentication,Development
+Fix bug in payment processing,Development
+Implement React component for dashboard,Development
+Set up CI/CD pipeline,Development
+Refactor database queries,Development
+Add TypeScript types,Development
+Create REST API with Express,Development
+Debug authentication flow,Development
+Write unit tests,Development
+Deploy to production,Development
+Optimize database indexes,Development
+Code review pull request,Development
+Update npm dependencies,Development
+Marketing,Marketing
+Create social media campaign,Marketing
+Design email newsletter,Marketing
+Plan product launch strategy,Marketing
+Analyze user engagement metrics,Marketing
+Write blog post about features,Marketing
+SEO optimization for landing page,Marketing
+Run A/B testing campaign,Marketing
+Create content calendar,Marketing
+Plan webinar series,Marketing
+Develop brand messaging,Marketing
+Launch advertising campaign,Marketing
+Track conversion metrics,Marketing
+Design,Design
+Design new logo,Design
+Create wireframes for mobile app,Design
+Update color scheme,Design
+Design marketing materials,Design
+Create UI mockups,Design
+Redesign user profile page,Design
+Design icon set,Design
+Create style guide,Design
+Build design system,Design
+Design landing page,Design
+Create illustrations,Design
+Design mobile interface,Design
+Research,Research
+Research competitor features,Research
+User research interviews,Research
+Analyze market trends,Research
+Investigate new technologies,Research
+Study user behavior patterns,Research
+Benchmark performance,Research
+Conduct usability testing,Research
+Analyze survey results,Research
+Research industry standards,Research
+Evaluate vendor solutions,Research
+Study customer feedback,Research
+Review analytics data,Research
+Operations,Operations
+Set up monitoring dashboard,Operations
+Configure cloud infrastructure,Operations
+Implement backup strategy,Operations
+Optimize server performance,Operations
+Database maintenance,Operations
+Update security policies,Operations
+Configure load balancer,Operations
+Set up disaster recovery,Operations
+Manage user permissions,Operations
+Monitor system health,Operations
+Scale infrastructure,Operations
+Automate deployment process,Operations

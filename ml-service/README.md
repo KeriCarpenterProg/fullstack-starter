@@ -24,6 +24,8 @@ AI-powered project categorization using machine learning.
    python train_model.py
    ```
 
+   This will load training data from `training_data.csv` and create `category_classifier.pkl`.
+
 4. **Start the API server:**
 
 ```bash
@@ -31,6 +33,46 @@ python app.py
 ```
 
 The API will run on http://localhost:5002 (default). Set PORT to override.
+
+## Training Data Management
+
+The model is trained on data from `training_data.csv`. You can easily update it:
+
+### Option 1: Edit CSV Directly
+
+Edit `training_data.csv` with any text editor or spreadsheet software:
+
+```csv
+text,category
+Build new API endpoint,Development
+Create marketing campaign,Marketing
+Design new logo,Design
+```
+
+### Option 2: Interactive Script
+
+Use the interactive helper script:
+
+```bash
+python add_training_data.py
+```
+
+This provides a menu to:
+- Add new training examples
+- View current statistics
+- Validate your entries
+
+### After Updating Data
+
+Retrain the model:
+
+```bash
+python train_model.py
+```
+
+Then restart the API server to use the new model.
+
+See [TRAINING_DATA.md](./TRAINING_DATA.md) for detailed documentation.
 
 ## API Endpoints
 
