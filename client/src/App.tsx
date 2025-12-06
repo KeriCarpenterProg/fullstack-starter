@@ -246,7 +246,7 @@ function App() {
       <header className="dashboard-header">
         <h1>🚀 My Projects</h1>
         <div className="user-info">
-          <span>Welcome, {user?.email || "User"}!</span>
+          <span>Welcome, {user?.email || "User"}</span>
           <button onClick={handleLogout} className="logout-button">
             Logout
           </button>
