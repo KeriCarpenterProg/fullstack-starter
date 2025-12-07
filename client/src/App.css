@@ -215,8 +215,18 @@ body {
 
 .create-project-section h2 {
   color: #374151;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   font-size: 20px;
+}
+
+.category-info {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.category-info strong {
+  color: #374151;
 }
 
 .create-project-form .form-row {
@@ -225,8 +235,21 @@ body {
   align-items: end;
 }
 
-.create-project-form input {
+.create-project-form .form-field {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.create-project-form .form-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.create-project-form input {
   padding: 12px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -242,6 +265,90 @@ body {
   width: auto;
   padding: 12px 24px;
   white-space: nowrap;
+  align-self: flex-end;
+}
+
+/* Category ML Suggestion Styles */
+.category-suggestion {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  z-index: 10;
+}
+
+.category-suggestion .muted {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+  font-style: italic;
+}
+
+.category-suggestion .error-text {
+  font-size: 13px;
+  color: #ef4444;
+  margin: 0;
+}
+
+.category-suggestion .suggestion-box {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.category-suggestion .suggestion-text {
+  margin-bottom: 8px;
+  color: #0c4a6e;
+}
+
+.category-suggestion .suggestion-text strong {
+  color: #075985;
+}
+
+.category-suggestion .suggestion-text small {
+  color: #0369a1;
+  font-size: 12px;
+}
+
+.category-suggestion .suggestion-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.category-suggestion .accept-btn,
+.category-suggestion .dismiss-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.category-suggestion .accept-btn {
+  background: #0ea5e9;
+  color: white;
+  border-color: #0ea5e9;
+}
+
+.category-suggestion .accept-btn:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+}
+
+.category-suggestion .dismiss-btn {
+  background: white;
+  color: #64748b;
+  border-color: #cbd5e1;
+}
+
+.category-suggestion .dismiss-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .projects-section h2 {

@@ -25,6 +25,7 @@ function App() {
   const [newProjectTitle, setNewProjectTitle] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
   const [newProjectCategory, setNewProjectCategory] = useState("uncategorized");
+  const [previousCategory, setPreviousCategory] = useState("uncategorized"); // Track previous value for dismiss
   const [suggestedCategory, setSuggestedCategory] = useState<string | null>(
     null,
   );
@@ -150,6 +151,10 @@ function App() {
         setSuggestedCategory(prediction.category);
         console.log("Suggested Category:", prediction.category);
         setSuggestedConfidence(prediction.confidence);
+
+        // Always auto-fill category with new suggestion
+        setPreviousCategory(newProjectCategory);
+        setNewProjectCategory(prediction.category);
       } catch (err: any) {
         if (!cancelled) {
           setSuggestionError(err.message || "Failed to get suggestion");
@@ -167,12 +172,16 @@ function App() {
 
   const acceptSuggestion = () => {
     if (suggestedCategory) {
+      setPreviousCategory(newProjectCategory);
       setNewProjectCategory(suggestedCategory);
       setSuggestedCategory(null); // hide suggestion after accepting
+      setSuggestedConfidence(null);
     }
   };
 
   const dismissSuggestion = () => {
+    // Revert to previous category value
+    setNewProjectCategory(previousCategory);
     setSuggestedCategory(null);
     setSuggestedConfidence(null);
   };
@@ -270,27 +279,87 @@ function App() {
       <div className="dashboard-content">
         <div className="create-project-section">
           <h2>Create New Project</h2>
+          <p className="category-info">
+            <strong>Available categories:</strong> Development, Marketing, Design, Research, Operations
+          </p>
           <form onSubmit={handleCreateProject} className="create-project-form">
             <div className="form-row">
-              <input
-                type="text"
-                value={newProjectTitle}
-                onChange={(e) => setNewProjectTitle(e.target.value)}
-                placeholder="Project title"
-                required
-              />
-              <input
-                type="text"
-                value={newProjectDescription}
-                onChange={(e) => setNewProjectDescription(e.target.value)}
-                placeholder="Project description"
-              />
-              <input
-                type="text"
-                value={newProjectCategory}
-                onChange={(e) => setNewProjectCategory(e.target.value)}
-                placeholder="Category (or accept suggestion)"
-              />
+              <div className="form-field">
+                <label htmlFor="project-title">Title</label>
+                <input
+                  id="project-title"
+                  type="text"
+                  value={newProjectTitle}
+                  onChange={(e) => setNewProjectTitle(e.target.value)}
+                  placeholder="Project title"
+                  required
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="project-description">Description</label>
+                <input
+                  id="project-description"
+                  type="text"
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                  placeholder="Project description"
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="project-category">Category</label>
+                <input
+                  id="project-category"
+                  type="text"
+                  value={newProjectCategory}
+                  onChange={(e) => {
+                    setPreviousCategory(newProjectCategory);
+                    setNewProjectCategory(e.target.value);
+                  }}
+                  placeholder="Category"
+                />
+                {/* ML Suggestion under category field */}
+                {(suggestionLoading || suggestedCategory || suggestionError) && (
+                  <div className="category-suggestion">
+                    {suggestionLoading && (
+                      <p className="muted">Predicting category...</p>
+                    )}
+                    {!suggestionLoading && suggestionError && (
+                      <p className="error-text">{suggestionError}</p>
+                    )}
+                    {!suggestionLoading && suggestedCategory && (
+                      <div className="suggestion-box">
+                        <div className="suggestion-text">
+                          <strong>Suggested:</strong> {suggestedCategory}
+                          {suggestedConfidence !== null && (
+                            <small>
+                              {" "}
+                              (confidence {(suggestedConfidence * 100).toFixed(1)}%)
+                            </small>
+                          )}
+                        </div>
+                        <div className="suggestion-actions">
+                          <button
+                            type="button"
+                            onClick={acceptSuggestion}
+                            className="accept-btn"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            onClick={dismissSuggestion}
+                            className="dismiss-btn"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <button
                 type="submit"
@@ -300,44 +369,6 @@ function App() {
                 {loading ? "⏳" : "+ Add Project"}
               </button>
             </div>
-            {/* Suggestion panel */}
-            {(suggestionLoading || suggestedCategory || suggestionError) && (
-              <div className="suggestion-panel">
-                {suggestionLoading && (
-                  <p className="muted">Predicting category...</p>
-                )}
-                {!suggestionLoading && suggestionError && (
-                  <p className="error-text">{suggestionError}</p>
-                )}
-                {!suggestionLoading && suggestedCategory && (
-                  <div className="suggestion-box">
-                    <strong>Suggested:</strong> {suggestedCategory}
-                    {suggestedConfidence !== null && (
-                      <small>
-                        {" "}
-                        (confidence {(suggestedConfidence * 100).toFixed(1)}%)
-                      </small>
-                    )}
-                    <div className="suggestion-actions">
-                      <button
-                        type="button"
-                        onClick={acceptSuggestion}
-                        className="accept-btn"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        type="button"
-                        onClick={dismissSuggestion}
-                        className="dismiss-btn"
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </form>
         </div>
 
