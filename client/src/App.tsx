@@ -4,6 +4,12 @@ import type { Project, MlPrediction } from "./types";
 import { useDebounce } from "./hooks/useDebounce";
 import "./App.css";
 
+// Generate avatar URL from user name
+function getAvatarUrl(name?: string | null, email?: string): string {
+  const displayName = name || email?.split('@')[0] || 'User';
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7c3aed&color=fff&size=128`;
+}
+
 function App() {
   const [user, setUser] = useState<any>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -246,12 +252,20 @@ function App() {
       <header className="dashboard-header">
         <h1>🚀 My Projects</h1>
         <div className="user-info">
-          <span>Welcome, {user?.email || "User"}</span>
-          <button onClick={handleLogout} className="logout-button">
-            Logout
-          </button>
-        </div>
-      </header>
+          <img 
+            src={getAvatarUrl(user?.name, user?.email)} 
+            alt={user?.name || user?.email || 'User avatar'}
+            className="user-avatar"
+          />
+            <div className="user-details">
+              <span className="user-name">{user?.name || user?.email?.split('@')[0] || 'User'}</span>
+              <span className="user-email">{user?.email}</span>
+            </div>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
+          </div>
+        </header>
 
       <div className="dashboard-content">
         <div className="create-project-section">
