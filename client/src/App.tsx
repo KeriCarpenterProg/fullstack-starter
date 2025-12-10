@@ -10,6 +10,20 @@ function getAvatarUrl(name?: string | null, email?: string): string {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7c3aed&color=fff&size=128`;
 }
 
+// Category configuration with colors and icons
+const categoryConfig: Record<string, { color: string; icon: string; bgColor: string }> = {
+  Development: { color: '#3b82f6', icon: '💻', bgColor: '#dbeafe' },
+  Marketing: { color: '#ec4899', icon: '📢', bgColor: '#fce7f3' },
+  Design: { color: '#8b5cf6', icon: '🎨', bgColor: '#ede9fe' },
+  Research: { color: '#10b981', icon: '🔬', bgColor: '#d1fae5' },
+  Operations: { color: '#f59e0b', icon: '⚙️', bgColor: '#fef3c7' },
+  uncategorized: { color: '#6b7280', icon: '📁', bgColor: '#f3f4f6' },
+};
+
+function getCategoryStyle(category: string) {
+  return categoryConfig[category] || categoryConfig.uncategorized;
+}
+
 function App() {
   const [user, setUser] = useState<any>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -279,9 +293,27 @@ function App() {
       <div className="dashboard-content">
         <div className="create-project-section">
           <h2>Create New Project</h2>
-          <p className="category-info">
-            <strong>Available categories:</strong> Development, Marketing, Design, Research, Operations
-          </p>
+          <div className="category-info">
+            <strong>Available categories:</strong>
+            <div className="category-list">
+              {Object.entries(categoryConfig)
+                .filter(([key]) => key !== 'uncategorized')
+                .map(([name, style]) => (
+                  <span
+                    key={name}
+                    className="category-chip"
+                    style={{
+                      backgroundColor: style.bgColor,
+                      color: style.color,
+                      borderColor: style.color,
+                    }}
+                  >
+                    <span>{style.icon}</span>
+                    {name}
+                  </span>
+                ))}
+            </div>
+          </div>
           <form onSubmit={handleCreateProject} className="create-project-form">
             <div className="form-row">
               <div className="form-field">
@@ -380,31 +412,40 @@ function App() {
             </div>
           ) : (
             <div className="projects-grid">
-              {projects.map((project) => (
-                <div key={project.id} className="project-card">
-                  <div className="project-card-header">
-                    <h3>{project.title}</h3>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDeleteProject(project.id, project.title)}
-                      title="Delete project"
-                    >
-                      🗑️
-                    </button>
+              {projects.map((project) => {
+                const categoryStyle = getCategoryStyle(project.category || "uncategorized");
+                return (
+                  <div key={project.id} className="project-card">
+                    <div className="project-card-header">
+                      <h3>{project.title}</h3>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDeleteProject(project.id, project.title)}
+                        title="Delete project"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <p>{project.description || "No description"}</p>
+                    <div className="project-meta">
+                      <span
+                        className="category-badge"
+                        style={{
+                          backgroundColor: categoryStyle.bgColor,
+                          color: categoryStyle.color,
+                          borderColor: categoryStyle.color,
+                        }}
+                      >
+                        <span className="category-icon">{categoryStyle.icon}</span>
+                        {project.category || "uncategorized"}
+                      </span>
+                      <small className="project-date">
+                        Created: {new Date(project.createdAt).toLocaleDateString()}
+                      </small>
+                    </div>
                   </div>
-                  <p>{project.description || "No description"}</p>
-                  <div className="project-meta">
-                    <small>
-                      Category: {project.category || "uncategorized"}
-                    </small>
-                    <br />
-                    <small>
-                      Created:{" "}
-                      {new Date(project.createdAt).toLocaleDateString()}
-                    </small>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
