@@ -36,6 +36,37 @@ async function generateEmbedding(
   }
 }
 
+/**
+ * Calculate cosine similarity between two vectors
+ * Returns a value between -1 and 1, where 1 means identical vectors
+ */
+function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) {
+    throw new Error("Vectors must have the same length");
+  }
+
+  let dotProduct = 0;
+  let magnitudeA = 0;
+  let magnitudeB = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    const aVal = a[i]!;
+    const bVal = b[i]!;
+    dotProduct += aVal * bVal;
+    magnitudeA += aVal * aVal;
+    magnitudeB += bVal * bVal;
+  }
+
+  magnitudeA = Math.sqrt(magnitudeA);
+  magnitudeB = Math.sqrt(magnitudeB);
+
+  if (magnitudeA === 0 || magnitudeB === 0) {
+    return 0;
+  }
+
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
 const router = Router();
 
 // All routes require authentication
@@ -218,6 +249,63 @@ router.delete("/:id", async (req, res) => {
 
     res.status(204).send(); // No content
   } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/projects/:id/similar - Find similar projects based on embeddings
+router.get("/:id/similar", async (req, res) => {
+  try {
+    const userId = (req.jwtUser as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    // Get the target project
+    const targetProject = await db.project.findFirst({
+      where: {
+        id: req.params.id,
+        ownerId: userId,
+      },
+    });
+
+    if (!targetProject) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    if (!targetProject.embedding) {
+      return res.status(400).json({
+        error: "Project does not have an embedding. Try updating the project.",
+      });
+    }
+
+    const targetEmbedding = targetProject.embedding as number[];
+
+    // Get all other projects with embeddings
+    const allProjects = await db.project.findMany({
+      where: {
+        ownerId: userId,
+        id: { not: req.params.id }, // Exclude the target project
+      },
+    });
+
+    // Calculate similarity scores (filter out projects without embeddings)
+    const projectsWithScores = allProjects
+      .filter((project) => project.embedding !== null)
+      .map((project) => {
+        const embedding = project.embedding as number[];
+        const similarity = cosineSimilarity(targetEmbedding, embedding);
+        return {
+          ...project,
+          similarityScore: similarity,
+        };
+      })
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .slice(0, limit);
+
+    res.json(projectsWithScores);
+  } catch (e: any) {
+    console.error("Similarity search error:", e);
     res.status(500).json({ error: e.message });
   }
 });
