@@ -6,8 +6,11 @@ from fastapi import FastAPI, HTTPException, Header, Query, Body, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
+from sentence_transformers import SentenceTransformer
 import os
 from pathlib import Path
+
+from torch import embedding
 
 app = FastAPI(title="Project Category Classifier API")
 
@@ -44,6 +47,10 @@ model = None
 if model_path.exists():
     model = joblib.load(str(model_path))
     print("✅ Model loaded successfully")
+    # Load embedding model for vector search
+    print("Loading embedding model...")
+    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+    print("✅ Embedding model loaded successfully")
 else:
     print(f"⚠️  Model not found at {model_path}. Run train_model.py first!")
 
@@ -148,8 +155,32 @@ async def predict(
     prediction = model.predict(data.dict())
     return {"version": version, "prediction": prediction}
 
+# Embedding models
+class EmbeddingRequest(BaseModel):
+    texts: list[str]
 
-# Example functions to load models
+class EmbedResponse(BaseModel):
+    embedding: list[float]
+    dimension: int
+
+@app.post("/embed", response_model=EmbedResponse)
+def generate_embedding(request: EmbeddingRequest):
+    """Generate embedding vector for input text
+    Returns a 384-dimensional vector for semantic similarity search
+    """
+    try:
+        embedding = embedding_model.encode(request.texts)
+        # For simplicity, return the embedding of the first text
+        embedding_vector = embedding[0].tolist()
+        return EmbedResponse(
+            embedding=embedding_vector,  # Convert numpy array to list
+            dimension=len(embedding_vector)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Embedding error: {str(e)}")
+
+
+
 def load_model_v1():
     # Placeholder for loading version 1 of the model
     return MockModel("v1")

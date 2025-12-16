@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 */node_modules/
+venv/
+*/venv/
+ml-service/venv/*
 
 # Environment variables
 .env
