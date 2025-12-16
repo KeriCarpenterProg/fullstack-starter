@@ -5,6 +5,68 @@ import { z } from "zod";
 import { db } from "../lib/db";
 import { auth } from "../lib/auth";
 
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5002";
+
+/**
+ * Generate embedding for project text using ML service
+ * Combines title and description for semantic search
+ */
+async function generateEmbedding(
+  title: string,
+  description?: string | null
+): Promise<number[] | null> {
+  try {
+    const text = description ? `${title} ${description}` : title;
+    const response = await fetch(`${ML_SERVICE_URL}/embed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: [text] }),
+    });
+
+    if (!response.ok) {
+      console.error("ML service error:", await response.text());
+      return null; // Fail gracefully - don't block project creation
+    }
+
+    const data = await response.json();
+    return data.embedding;
+  } catch (error) {
+    console.error("Failed to generate embedding:", error);
+    return null; // Fail gracefully
+  }
+}
+
+/**
+ * Calculate cosine similarity between two vectors
+ * Returns a value between -1 and 1, where 1 means identical vectors
+ */
+function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) {
+    throw new Error("Vectors must have the same length");
+  }
+
+  let dotProduct = 0;
+  let magnitudeA = 0;
+  let magnitudeB = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    const aVal = a[i]!;
+    const bVal = b[i]!;
+    dotProduct += aVal * bVal;
+    magnitudeA += aVal * aVal;
+    magnitudeB += bVal * bVal;
+  }
+
+  magnitudeA = Math.sqrt(magnitudeA);
+  magnitudeB = Math.sqrt(magnitudeB);
+
+  if (magnitudeA === 0 || magnitudeB === 0) {
+    return 0;
+  }
+
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
 const router = Router();
 
 // All routes require authentication
@@ -58,12 +120,18 @@ router.post("/", async (req, res) => {
     const input = CreateProject.parse(req.body);
     const userId = (req.jwtUser as JwtUser)?.id;
     if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+
     const { category, ...rest } = input;
+
+    // Generate embedding for semantic search
+    const embedding = await generateEmbedding(input.title, input.description);
+
     const project = await db.project.create({
       data: {
         ...rest,
         category: category ?? "uncategorized",
         ownerId: userId,
+        ...(embedding ? { embedding } : {}), // Only set if embedding was generated
       },
     });
     return res.status(201).json(project);
@@ -123,11 +191,24 @@ router.put("/:id", async (req, res) => {
     }
 
     const { category, ...rest } = input;
+
+    // Regenerate embedding if title or description changed
+    let embedding = undefined;
+    if (input.title !== undefined || input.description !== undefined) {
+      const newTitle = input.title ?? existingProject.title;
+      const newDescription =
+        input.description !== undefined
+          ? input.description
+          : existingProject.description;
+      embedding = await generateEmbedding(newTitle, newDescription);
+    }
+
     const project = await db.project.update({
       where: { id: req.params.id },
       data: {
         ...rest,
         ...(category ? { category } : {}),
+        ...(embedding ? { embedding } : {}),
       },
     });
 
@@ -168,6 +249,63 @@ router.delete("/:id", async (req, res) => {
 
     res.status(204).send(); // No content
   } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/projects/:id/similar - Find similar projects based on embeddings
+router.get("/:id/similar", async (req, res) => {
+  try {
+    const userId = (req.jwtUser as JwtUser)?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    // Get the target project
+    const targetProject = await db.project.findFirst({
+      where: {
+        id: req.params.id,
+        ownerId: userId,
+      },
+    });
+
+    if (!targetProject) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    if (!targetProject.embedding) {
+      return res.status(400).json({
+        error: "Project does not have an embedding. Try updating the project.",
+      });
+    }
+
+    const targetEmbedding = targetProject.embedding as number[];
+
+    // Get all other projects with embeddings
+    const allProjects = await db.project.findMany({
+      where: {
+        ownerId: userId,
+        id: { not: req.params.id }, // Exclude the target project
+      },
+    });
+
+    // Calculate similarity scores (filter out projects without embeddings)
+    const projectsWithScores = allProjects
+      .filter((project) => project.embedding !== null)
+      .map((project) => {
+        const embedding = project.embedding as number[];
+        const similarity = cosineSimilarity(targetEmbedding, embedding);
+        return {
+          ...project,
+          similarityScore: similarity,
+        };
+      })
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .slice(0, limit);
+
+    res.json(projectsWithScores);
+  } catch (e: any) {
+    console.error("Similarity search error:", e);
     res.status(500).json({ error: e.message });
   }
 });

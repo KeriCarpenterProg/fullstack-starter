@@ -10,8 +10,6 @@ from sentence_transformers import SentenceTransformer
 import os
 from pathlib import Path
 
-from torch import embedding
-
 app = FastAPI(title="Project Category Classifier API")
 
 # CORS configuration
