@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Project, AuthResponse, MlPrediction } from "../types";
+import type { Project, SimilarProject, AuthResponse, MlPrediction } from "../types";
 
 // Base configuration
 const API_BASE_URL =
@@ -75,6 +75,11 @@ export const projectsAPI = {
 
   async deleteProject(id: string): Promise<void> {
     await api.delete(`/projects/${id}`);
+  },
+
+  async getSimilarProjects(id: string, limit: number = 5): Promise<SimilarProject[]> {
+    const response = await api.get(`/projects/${id}/similar?limit=${limit}`);
+    return response.data;
   },
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { authAPI, projectsAPI, mlAPI } from "./services/api";
-import type { Project, MlPrediction } from "./types";
+import type { Project, SimilarProject, MlPrediction } from "./types";
 import { useDebounce } from "./hooks/useDebounce";
 import "./App.css";
 
@@ -49,6 +49,12 @@ function App() {
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const debouncedDescription = useDebounce(newProjectDescription, 600);
+
+  // Similar projects state
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
+  const [similarProjects, setSimilarProjects] = useState<Record<string, SimilarProject[]>>({});
+  const [loadingSimilar, setLoadingSimilar] = useState<string | null>(null);
+  const [similarError, setSimilarError] = useState<Record<string, string>>({});
 
   // Check if user is already logged in
   useEffect(() => {
@@ -198,6 +204,41 @@ function App() {
     setNewProjectCategory(previousCategory);
     setSuggestedCategory(null);
     setSuggestedConfidence(null);
+  };
+
+  const fetchSimilarProjects = async (projectId: string) => {
+    if (similarProjects[projectId]) {
+      // Already cached, just toggle
+      setExpandedProjectId(expandedProjectId === projectId ? null : projectId);
+      return;
+    }
+
+    setLoadingSimilar(projectId);
+    setSimilarError({ ...similarError, [projectId]: "" });
+    try {
+      const similar = await projectsAPI.getSimilarProjects(projectId, 5);
+      setSimilarProjects({ ...similarProjects, [projectId]: similar });
+      setExpandedProjectId(projectId);
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.error || error.message || "Failed to fetch similar projects";
+      setSimilarError({ ...similarError, [projectId]: errorMsg });
+    } finally {
+      setLoadingSimilar(null);
+    }
+  };
+
+  const handleToggleSimilar = (projectId: string) => {
+    if (expandedProjectId === projectId) {
+      setExpandedProjectId(null);
+    } else {
+      fetchSimilarProjects(projectId);
+    }
+  };
+
+  const getSimilarityColor = (score: number): string => {
+    if (score >= 0.7) return "#10b981"; // Green
+    if (score >= 0.4) return "#3b82f6"; // Blue
+    return "#6b7280"; // Gray
   };
 
   const renderAuth = () => (
@@ -414,35 +455,109 @@ function App() {
             <div className="projects-grid">
               {projects.map((project) => {
                 const categoryStyle = getCategoryStyle(project.category || "uncategorized");
+                const isExpanded = expandedProjectId === project.id;
+                const projectSimilar = similarProjects[project.id] || [];
+                const isLoading = loadingSimilar === project.id;
+                const error = similarError[project.id];
+
                 return (
-                  <div key={project.id} className="project-card">
-                    <div className="project-card-header">
-                      <h3>{project.title}</h3>
+                  <div key={project.id} className="project-card-wrapper">
+                    <div className="project-card">
+                      <div className="project-card-header">
+                        <h3>{project.title}</h3>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDeleteProject(project.id, project.title)}
+                          title="Delete project"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                      <p>{project.description || "No description"}</p>
+                      <div className="project-meta">
+                        <span
+                          className="category-badge"
+                          style={{
+                            backgroundColor: categoryStyle.bgColor,
+                            color: categoryStyle.color,
+                            borderColor: categoryStyle.color,
+                          }}
+                        >
+                          <span className="category-icon">{categoryStyle.icon}</span>
+                          {project.category || "uncategorized"}
+                        </span>
+                        <small className="project-date">
+                          Created: {new Date(project.createdAt).toLocaleDateString()}
+                        </small>
+                      </div>
                       <button
-                        className="delete-button"
-                        onClick={() => handleDeleteProject(project.id, project.title)}
-                        title="Delete project"
+                        className="similar-button"
+                        onClick={() => handleToggleSimilar(project.id)}
+                        aria-expanded={isExpanded}
+                        aria-label={`${isExpanded ? 'Hide' : 'Find'} similar projects`}
                       >
-                        🗑️
+                        {isExpanded ? "▼ Hide Similar" : "▶ Find Similar"}
                       </button>
                     </div>
-                    <p>{project.description || "No description"}</p>
-                    <div className="project-meta">
-                      <span
-                        className="category-badge"
-                        style={{
-                          backgroundColor: categoryStyle.bgColor,
-                          color: categoryStyle.color,
-                          borderColor: categoryStyle.color,
-                        }}
-                      >
-                        <span className="category-icon">{categoryStyle.icon}</span>
-                        {project.category || "uncategorized"}
-                      </span>
-                      <small className="project-date">
-                        Created: {new Date(project.createdAt).toLocaleDateString()}
-                      </small>
-                    </div>
+
+                    {isExpanded && (
+                      <div className="similar-projects-section">
+                        {isLoading && (
+                          <div className="similar-projects-content">
+                            <p className="loading">Loading similar projects...</p>
+                          </div>
+                        )}
+                        {error && (
+                          <div className="similar-projects-content">
+                            <p className="error-message">{error}</p>
+                          </div>
+                        )}
+                        {!isLoading && !error && projectSimilar.length === 0 && (
+                          <div className="similar-projects-content">
+                            <p className="similar-projects-empty">
+                              No similar projects found. This project may not have an embedding yet.
+                            </p>
+                          </div>
+                        )}
+                        {!isLoading && !error && projectSimilar.length > 0 && (
+                          <div className="similar-projects-content">
+                            <p className="similar-projects-header">Similar Projects:</p>
+                            <div className="similar-project-list">
+                              {projectSimilar.map((similar) => {
+                                const similarCategoryStyle = getCategoryStyle(similar.category || "uncategorized");
+                                const similarityPercent = Math.round(similar.similarityScore * 100);
+                                const similarityColor = getSimilarityColor(similar.similarityScore);
+
+                                return (
+                                  <div key={similar.id} className="similar-project-item">
+                                    <div className="similar-project-info">
+                                      <h4>{similar.title}</h4>
+                                      <p className="similar-project-desc">{similar.description || "No description"}</p>
+                                      <span
+                                        className="similar-category-badge"
+                                        style={{
+                                          backgroundColor: similarCategoryStyle.bgColor,
+                                          color: similarCategoryStyle.color,
+                                        }}
+                                      >
+                                        {similarCategoryStyle.icon} {similar.category || "uncategorized"}
+                                      </span>
+                                    </div>
+                                    <div
+                                      className="similarity-score"
+                                      style={{ backgroundColor: similarityColor }}
+                                      title={`${similarityPercent}% similarity`}
+                                    >
+                                      {similarityPercent}%
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

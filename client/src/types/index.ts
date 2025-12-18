@@ -17,6 +17,10 @@ export interface Project {
   updatedAt: string;
 }
 
+export interface SimilarProject extends Project {
+  similarityScore: number;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
