@@ -50,7 +50,7 @@ export const projectsAPI = {
     description?: string,
     category?: string,
   ): Promise<Project> {
-    const payload: Record<string, any> = { title };
+    const payload: { title: string; description?: string; category?: string } = { title };
     if (description && description.trim().length)
       payload.description = description;
     if (category && category.trim().length) payload.category = category;
@@ -64,7 +64,7 @@ export const projectsAPI = {
     description?: string,
     category?: string,
   ): Promise<Project> {
-    const payload: Record<string, any> = {};
+    const payload: { title?: string; description?: string; category?: string } = {};
     if (title && title.trim().length) payload.title = title;
     if (description && description.trim().length)
       payload.description = description;
