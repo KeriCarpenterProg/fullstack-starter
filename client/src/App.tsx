@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { authAPI, projectsAPI, mlAPI } from "./services/api";
-import type { Project, SimilarProject, MlPrediction } from "./types";
+import type { User, Project, SimilarProject, MlPrediction } from "./types";
 import { useDebounce } from "./hooks/useDebounce";
 import "./App.css";
 
@@ -25,7 +25,7 @@ function getCategoryStyle(category: string) {
 }
 
 function App() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup" | "dashboard">(
@@ -175,20 +175,23 @@ function App() {
         // Always auto-fill category with new suggestion
         setPreviousCategory(newProjectCategory);
         setNewProjectCategory(prediction.category);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
-          setSuggestionError(err.message || "Failed to get suggestion");
+          const errorMessage = err instanceof Error ? err.message : "Failed to get suggestion";
+          setSuggestionError(errorMessage);
           setSuggestedCategory(null);
           setSuggestedConfidence(null);
         }
       } finally {
-        !cancelled && setSuggestionLoading(false);
+        if (!cancelled) {
+          setSuggestionLoading(false);
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [debouncedDescription]);
+  }, [debouncedDescription, newProjectCategory]);
 
   const acceptSuggestion = () => {
     if (suggestedCategory) {
@@ -219,8 +222,11 @@ function App() {
       const similar = await projectsAPI.getSimilarProjects(projectId, 5);
       setSimilarProjects({ ...similarProjects, [projectId]: similar });
       setExpandedProjectId(projectId);
-    } catch (error: any) {
-      const errorMsg = error?.response?.data?.error || error.message || "Failed to fetch similar projects";
+    } catch (error: unknown) {
+      let errorMsg = "Failed to fetch similar projects";
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      }
       setSimilarError({ ...similarError, [projectId]: errorMsg });
     } finally {
       setLoadingSimilar(null);
